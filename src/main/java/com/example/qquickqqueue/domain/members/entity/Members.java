@@ -3,8 +3,8 @@ package com.example.qquickqqueue.domain.members.entity;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
