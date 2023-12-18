@@ -3,12 +3,16 @@ package com.example.qquickqqueue.domain.musical.entity;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
 import java.util.Date;
 
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Musical {
