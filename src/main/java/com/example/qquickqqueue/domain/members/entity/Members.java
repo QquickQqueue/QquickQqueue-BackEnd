@@ -1,17 +1,22 @@
 package com.example.qquickqqueue.domain.members.entity;
 
 import com.example.qquickqqueue.domain.enumPackage.Gender;
+import com.example.qquickqqueue.util.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Members {
+public class Members extends Timestamped {
     @Id
     private String email;
 
@@ -37,7 +42,4 @@ public class Members {
 
     @Column
     private Date outDate;
-
-    @Column
-    private String profileImage;
 }
