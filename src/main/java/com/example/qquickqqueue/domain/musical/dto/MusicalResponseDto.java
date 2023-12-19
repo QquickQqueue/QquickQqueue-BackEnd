@@ -12,6 +12,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 public class MusicalResponseDto {
+    private Long id;
     private String title;
     private Rating rating;
     private String thumbnailUrl;
