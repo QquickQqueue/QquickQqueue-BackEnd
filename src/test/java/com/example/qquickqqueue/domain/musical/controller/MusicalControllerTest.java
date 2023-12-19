@@ -24,6 +24,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -57,7 +58,7 @@ class MusicalControllerTest {
     @DisplayName("readMusicals Method Test")
     class ReadMusicals {
         @Test
-        void readMusicals() {
+        void readMusicalsTest() {
             // given
             Pageable pageable = PageRequest.of(0, 10);
 
@@ -82,6 +83,28 @@ class MusicalControllerTest {
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
             assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusical Method Test")
+    class ReadMusical {
+        @Test
+        void readMusicalTest() {
+            // given
+            Long musicalId = 1L;
+
+            ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("조회 성공", MusicalResponseDto.builder()
+                    .id(1L).build()), HttpStatus.OK);
+
+            when(musicalService.readMusical(musicalId)).thenReturn(responseEntity);
+
+            // when
+            ResponseEntity<Message> response = musicalController.readMusical(musicalId);
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
         }
     }
 }
