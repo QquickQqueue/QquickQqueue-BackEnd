@@ -4,10 +4,10 @@ import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.util.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
@@ -18,13 +18,14 @@ import java.util.Date;
 @AllArgsConstructor
 public class Members extends Timestamped {
     @Id
+    @Column(name = "EMAIL", length = 50)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @JsonIgnore
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String name;
 
     @Enumerated(EnumType.STRING)

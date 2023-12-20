@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SeatGrade {
     @Id
+    @Column(name = "SEAT_GRADE_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
