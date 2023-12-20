@@ -23,8 +23,10 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
@@ -35,6 +37,7 @@ class MusicalServiceTest {
     private MusicalService musicalService;
 
     Musical musical = Musical.builder()
+            .id(1L)
             .title("musical.getTitle()")
             .thumbnailUrl("musical.getThumbnailUrl()")
             .rating(Rating.PG12)
@@ -56,7 +59,7 @@ class MusicalServiceTest {
     @DisplayName("readMusicals Method Test")
     class ReadMusicals {
         @Test
-        void readMusicals() {
+        void readMusicalsTest() {
             // given
             Pageable pageable = PageRequest.of(0, 10);
 
@@ -82,6 +85,45 @@ class MusicalServiceTest {
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
             assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusical Method Test")
+    class ReadMusical {
+        @Test
+        @DisplayName("readMusical Method Success Test")
+        void readMusicalTest() {
+            // given
+            Long musicalId = 1L;
+
+            MusicalResponseDto musicalResponseDto = MusicalResponseDto.builder()
+                    .id(musical.getId())
+                    .title(musical.getTitle())
+                    .build();
+
+            when(musicalRepository.findById(musicalId)).thenReturn(Optional.of(musical));
+
+            // when
+            ResponseEntity<Message> response = musicalService.readMusical(musicalId);
+            MusicalResponseDto responseValue = (MusicalResponseDto) response.getBody().getData();
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(musicalResponseDto.getId(), responseValue.getId());
+            assertEquals(musicalResponseDto.getTitle(), responseValue.getTitle());
+        }
+
+        @Test
+        @DisplayName("readMusical Method Exception Test")
+        void readMusicalExceptionTest() {
+            // given
+            Long musicalId = 2L;
+
+            when(musicalRepository.findById(musicalId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(IllegalArgumentException.class, () -> musicalService.readMusical(musicalId));
         }
     }
 }
