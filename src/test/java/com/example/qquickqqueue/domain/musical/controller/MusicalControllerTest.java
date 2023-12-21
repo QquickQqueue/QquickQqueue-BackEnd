@@ -1,7 +1,10 @@
 package com.example.qquickqqueue.domain.musical.controller;
 
+import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
+import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.service.MusicalService;
 import com.example.qquickqqueue.util.Message;
@@ -103,7 +106,31 @@ class MusicalControllerTest {
             ResponseEntity<Message> response = musicalController.readMusical(musicalId);
 
             // then
-            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
+            assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusicalRoundInfoByDate Method Test")
+    class ReadMusicalRoundInfoByDate {
+        @Test
+        @DisplayName("readMusicalRoundInfoByDate Method Test")
+        void readMusicalRoundInfoByDateTest() {
+            // given
+            ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("조회 성공", MusicalRoundInfoResponseDto.builder()
+                    .sumVIP(2).sumR(2).sumS(3).sumA(4).sumB(5).sumC(6).actors(List.of(new Actor(1L, "name", Gender.MALE)))
+                    .build()), HttpStatus.OK);
+
+            Long scheduleId = 1L;
+
+            when(musicalService.readMusicalRoundInfoByDate(scheduleId)).thenReturn(responseEntity);
+
+            // when
+            ResponseEntity<Message> response = musicalController.readMusicalInfoByDate(scheduleId);
+
+            // then
+            assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
             assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
         }
     }
