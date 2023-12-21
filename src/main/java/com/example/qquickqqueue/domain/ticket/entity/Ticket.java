@@ -3,14 +3,19 @@ package com.example.qquickqqueue.domain.ticket.entity;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
+import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
 import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ticket {
@@ -46,4 +51,9 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SEAT_GRADE_ID")
     private SeatGrade seatGrade;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SEAT_ID")
+    private Seat seat;
 }
