@@ -54,6 +54,35 @@ public class MusicalService {
                 .startDate(musical.getStartDate())
                 .endDate(musical.getEndDate())
                 .runningTime(musical.getRunningTime())
+                .scheduleList(scheduleRepository.findAllByMusical_Id(musicalId)
+                        .stream().map(schedule -> ScheduleResponseDto.builder()
+                                .id(schedule.getId())
+                                .startTime(schedule.getStartTime())
+                                .endTime(schedule.getEndTime())
+                                .isDeleted(schedule.isDeleted())
+                                .build()).toList())
+                .build()), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Message> readMusicalRoundInfoByDate(Long scheduleId) {
+        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findAllBySchedule_IdAndReserved(scheduleId, false);
+        int vip = 0, r = 0, s = 0, a = 0, b = 0, c = 0;
+        for (ScheduleSeat seat : scheduleSeats) {
+            switch(seat.getSeatGrade().getGrade()) {
+                case VIP -> vip++;
+                case R -> r++;
+                case S -> s++;
+                case A -> a++;
+                case B -> b++;
+                case C -> c++;
+            }
+        }
+        return new ResponseEntity<>(new Message("조회 성공", MusicalRoundInfoResponseDto.builder()
+                .sumVIP(vip).sumR(r).sumS(s).sumA(a).sumB(b).sumC(c)
+                .actors(castingRepository.findAllBySchedule_Id(scheduleId)
+                        .stream()
+                        .map(Casting::getActor)
+                        .toList())
                 .build()), HttpStatus.OK);
     }
 }
