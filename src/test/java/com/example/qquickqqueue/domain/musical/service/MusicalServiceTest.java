@@ -1,9 +1,21 @@
 package com.example.qquickqqueue.domain.musical.service;
 
+import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.casting.entity.Casting;
+import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
+import com.example.qquickqqueue.domain.enumPackage.Gender;
+import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
+import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
+import com.example.qquickqqueue.domain.schedule.entity.Schedule;
+import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
+import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
+import com.example.qquickqqueue.domain.seat.entity.Seat;
+import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
+import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import com.example.qquickqqueue.util.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +46,10 @@ import static org.mockito.Mockito.when;
 class MusicalServiceTest {
     @Mock
     private MusicalRepository musicalRepository;
+    @Mock
+    private ScheduleSeatRepository scheduleSeatRepository;
+    @Mock
+    private CastingRepository castingRepository;
     @InjectMocks
     private MusicalService musicalService;
 
@@ -124,6 +141,87 @@ class MusicalServiceTest {
 
             // when & then
             assertThrows(IllegalArgumentException.class, () -> musicalService.readMusical(musicalId));
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusicalRoundInfoByDate Method Test")
+    class ReadMusicalRoundInfoByDate {
+        @Test
+        @DisplayName("readMusicalRoundInfoByDate Method Test")
+        void readMusicalRoundInfoByDateTest() {
+            // given
+            Actor actor = new Actor(1L, "name", Gender.MALE);
+
+            Schedule schedule = Schedule.builder()
+                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).actor(actor).musical(musical).isDeleted(false)
+                    .build();
+
+            Seat seat = Seat.builder()
+                    .id(1L).columnNum(1).rowNum(3).stadium(new Stadium(1L, "name", "address"))
+                    .build();
+
+            SeatGrade seatGrade1 = new SeatGrade(1L, Grade.R, 1000);
+            SeatGrade seatGrade2 = new SeatGrade(2L, Grade.R, 1000);
+            SeatGrade seatGrade3 = new SeatGrade(3L, Grade.VIP, 1000);
+            SeatGrade seatGrade4 = new SeatGrade(4L, Grade.S, 1000);
+            SeatGrade seatGrade5 = new SeatGrade(5L, Grade.S, 1000);
+            SeatGrade seatGrade6 = new SeatGrade(6L, Grade.C, 1000);
+            SeatGrade seatGrade7 = new SeatGrade(7L, Grade.C, 1000);
+            SeatGrade seatGrade8 = new SeatGrade(8L, Grade.C, 1000);
+
+            ScheduleSeat scheduleSeat1 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade1).isReserved(false).build();
+            ScheduleSeat scheduleSeat2 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade2).isReserved(false).build();
+            ScheduleSeat scheduleSeat3 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade3).isReserved(false).build();
+            ScheduleSeat scheduleSeat4 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade4).isReserved(false).build();
+            ScheduleSeat scheduleSeat5 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade5).isReserved(false).build();
+            ScheduleSeat scheduleSeat6 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade6).isReserved(false).build();
+            ScheduleSeat scheduleSeat7 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade7).isReserved(false).build();
+            ScheduleSeat scheduleSeat8 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade8).isReserved(false).build();
+
+            Casting casting1 = Casting.builder()
+                    .id(1L).actor(actor).musical(musical).schedule(schedule).build();
+            Casting casting2 = Casting.builder()
+                    .id(1L).actor(actor).musical(musical).schedule(schedule).build();
+            Casting casting3 = Casting.builder()
+                    .id(1L).actor(actor).musical(musical).schedule(schedule).build();
+            Casting casting4 = Casting.builder()
+                    .id(1L).actor(actor).musical(musical).schedule(schedule).build();
+            Casting casting5 = Casting.builder()
+                    .id(1L).actor(actor).musical(musical).schedule(schedule).build();
+
+
+            List<ScheduleSeat> scheduleSeats = List.of(scheduleSeat1, scheduleSeat2, scheduleSeat3, scheduleSeat4, scheduleSeat5,
+                    scheduleSeat6, scheduleSeat7, scheduleSeat8);
+            List<Casting> castings = List.of(casting1, casting2, casting3, casting4, casting5);
+
+            Long scheduleId = 1L;
+
+            when(scheduleSeatRepository.findAllBySchedule_IdAndReserved(scheduleId, false)).thenReturn(scheduleSeats);
+            when(castingRepository.findAllBySchedule_Id(scheduleId)).thenReturn(castings);
+
+            // when
+            ResponseEntity<Message> response = musicalService.readMusicalRoundInfoByDate(scheduleId);
+            MusicalRoundInfoResponseDto responseValue = (MusicalRoundInfoResponseDto) response.getBody().getData();
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(1, responseValue.getSumVIP());
+            assertEquals(2, responseValue.getSumR());
+            assertEquals(2, responseValue.getSumS());
+            assertEquals(0, responseValue.getSumA());
+            assertEquals(0, responseValue.getSumB());
+            assertEquals(3, responseValue.getSumC());
+            assertEquals(List.of(actor, actor, actor, actor, actor), responseValue.getActors());
+            assertEquals(actor, responseValue.getActors().get(1));
         }
     }
 }
