@@ -1,14 +1,19 @@
 package com.example.qquickqqueue.domain.schedule.entity;
 
+import com.example.qquickqqueue.domain.actor.entity.Actor;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Time;
+import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Schedule {
@@ -18,10 +23,10 @@ public class Schedule {
     private Long id;
 
     @Column(nullable = false)
-    private Time startTime;
+    private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private Time endTime;
+    private LocalDateTime endTime;
 
     @Column(nullable = false)
     private boolean isDeleted;
@@ -30,4 +35,9 @@ public class Schedule {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MUSICAL_ID")
     private Musical musical;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACTOR_ID")
+    private Actor actor;
 }
