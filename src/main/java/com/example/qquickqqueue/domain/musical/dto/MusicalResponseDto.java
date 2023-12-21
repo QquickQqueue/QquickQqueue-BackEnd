@@ -1,12 +1,14 @@
 package com.example.qquickqqueue.domain.musical.dto;
 
 import com.example.qquickqqueue.domain.enumPackage.Rating;
+import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Builder
@@ -20,4 +22,5 @@ public class MusicalResponseDto {
     private Date startDate;
     private Date endDate;
     private Time runningTime;
+    private List<ScheduleResponseDto> scheduleList;
 }
