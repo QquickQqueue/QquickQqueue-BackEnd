@@ -4,11 +4,13 @@ import com.example.qquickqqueue.domain.musical.entity.Musical;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
 
 @Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Schedule {

@@ -6,9 +6,11 @@ import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleSeat {
