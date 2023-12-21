@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,5 +30,10 @@ public class MusicalController {
     @GetMapping("/musicals/round/{schedule-id}")
     public ResponseEntity<Message> readMusicalInfoByDate(@PathVariable(name = "schedule-id") Long scheduleId) {
         return musicalService.readMusicalRoundInfoByDate(scheduleId);
+    }
+
+    @GetMapping("/musicals/seat/{schedule-id}")
+    public ResponseEntity<Message> readMusicalSeatInfo(@PathVariable(name = "schedule-id") Long scheduleId) {
+        return musicalService.readMusicalSeatInfo(scheduleId);
     }
 }
