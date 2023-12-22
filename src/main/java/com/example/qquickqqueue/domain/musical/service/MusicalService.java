@@ -8,6 +8,7 @@ import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
+import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
 import com.example.qquickqqueue.util.Message;
@@ -65,7 +66,7 @@ public class MusicalService {
     }
 
     public ResponseEntity<Message> readMusicalRoundInfoByDate(Long scheduleId) {
-        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findAllBySchedule_IdAndReserved(scheduleId, false);
+        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false);
         int vip = 0, r = 0, s = 0, a = 0, b = 0, c = 0;
         for (ScheduleSeat seat : scheduleSeats) {
             switch(seat.getSeatGrade().getGrade()) {
@@ -84,5 +85,18 @@ public class MusicalService {
                         .map(Casting::getActor)
                         .toList())
                 .build()), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Message> readMusicalSeatInfo(Long scheduleId) {
+        return new ResponseEntity<>(new Message("조회 성공", scheduleSeatRepository.findAllBySchedule_Id(scheduleId)
+                .stream()
+                .map(scheduleSeat -> ScheduleSeatResponseDto.builder()
+                        .id(scheduleSeat.getId())
+                        .isReserved(scheduleSeat.isReserved())
+                        .grade(scheduleSeat.getSeatGrade().getGrade())
+                        .price(scheduleSeat.getSeatGrade().getPrice())
+                        .columnNum(scheduleSeat.getSeat().getColumnNum())
+                        .rowNum(scheduleSeat.getSeat().getRowNum())
+                        .build()).toList()), HttpStatus.OK);
     }
 }
