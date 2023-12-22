@@ -3,13 +3,17 @@ package com.example.qquickqqueue.domain.members.entity;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.util.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Entity
 @Getter
@@ -21,7 +25,7 @@ public class Members extends Timestamped {
     @Column(name = "EMAIL", length = 50)
     private String email;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     @JsonIgnore
     private String password;
 
@@ -33,14 +37,12 @@ public class Members extends Timestamped {
     private Gender gender;
 
     @Column(nullable = false)
-    private Date birth;
+    private LocalDate birth;
 
     @Column(nullable = false)
+    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "휴대폰 번호를 확인해주세요.")
     private String phoneNumber;
 
-    @Column(nullable = false)
-    private Date joinDate;
-
     @Column
-    private Date outDate;
+    private LocalDate outDate;
 }
