@@ -10,7 +10,9 @@ import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
+import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
+import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
@@ -49,6 +51,8 @@ class MusicalServiceTest {
     private MusicalRepository musicalRepository;
     @Mock
     private ScheduleSeatRepository scheduleSeatRepository;
+    @Mock
+    private ScheduleRepository scheduleRepository;
     @Mock
     private CastingRepository castingRepository;
     @InjectMocks
@@ -115,12 +119,35 @@ class MusicalServiceTest {
             // given
             Long musicalId = 1L;
 
+            Actor actor = new Actor(1L, "name", Gender.MALE);
+            Schedule schedule1 = Schedule.builder()
+                    .id(1L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .build();
+            Schedule schedule2 = Schedule.builder()
+                    .id(2L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .build();
+            Schedule schedule3 = Schedule.builder()
+                    .id(3L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .build();
+
+            List<Schedule> schedules = List.of(schedule1, schedule2, schedule3);
+
+            ScheduleResponseDto scheduleResponseDto1 = ScheduleResponseDto.builder()
+                    .id(1L)
+                    .build();
+            ScheduleResponseDto scheduleResponseDto2 = ScheduleResponseDto.builder()
+                    .id(2L)
+                    .build();
+            ScheduleResponseDto scheduleResponseDto3 = ScheduleResponseDto.builder()
+                    .id(3L)
+                    .build();
+
             MusicalResponseDto musicalResponseDto = MusicalResponseDto.builder()
-                    .id(musical.getId())
-                    .title(musical.getTitle())
+                    .id(musical.getId()).title(musical.getTitle())
                     .build();
 
             when(musicalRepository.findById(musicalId)).thenReturn(Optional.of(musical));
+            when(scheduleRepository.findAllByMusical_Id(musicalId)).thenReturn(schedules);
 
             // when
             ResponseEntity<Message> response = musicalService.readMusical(musicalId);
@@ -130,6 +157,9 @@ class MusicalServiceTest {
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals(musicalResponseDto.getId(), responseValue.getId());
             assertEquals(musicalResponseDto.getTitle(), responseValue.getTitle());
+            assertEquals(scheduleResponseDto1.getId(), responseValue.getScheduleList().get(0).getId());
+            assertEquals(scheduleResponseDto2.getId(), responseValue.getScheduleList().get(1).getId());
+            assertEquals(scheduleResponseDto3.getId(), responseValue.getScheduleList().get(2).getId());
         }
 
         @Test
@@ -170,6 +200,8 @@ class MusicalServiceTest {
             SeatGrade seatGrade6 = new SeatGrade(6L, Grade.C, 1000);
             SeatGrade seatGrade7 = new SeatGrade(7L, Grade.C, 1000);
             SeatGrade seatGrade8 = new SeatGrade(8L, Grade.C, 1000);
+            SeatGrade seatGrade9 = new SeatGrade(8L, Grade.A, 1000);
+            SeatGrade seatGrade10 = new SeatGrade(8L, Grade.B, 1000);
 
             ScheduleSeat scheduleSeat1 = ScheduleSeat.builder()
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade1).isReserved(false).build();
@@ -187,6 +219,10 @@ class MusicalServiceTest {
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade7).isReserved(false).build();
             ScheduleSeat scheduleSeat8 = ScheduleSeat.builder()
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade8).isReserved(false).build();
+            ScheduleSeat scheduleSeat9 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade9).isReserved(false).build();
+            ScheduleSeat scheduleSeat10 = ScheduleSeat.builder()
+                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade10).isReserved(false).build();
 
             Casting casting1 = Casting.builder()
                     .id(1L).actor(actor).musical(musical).schedule(schedule).build();
@@ -201,7 +237,7 @@ class MusicalServiceTest {
 
 
             List<ScheduleSeat> scheduleSeats = List.of(scheduleSeat1, scheduleSeat2, scheduleSeat3, scheduleSeat4, scheduleSeat5,
-                    scheduleSeat6, scheduleSeat7, scheduleSeat8);
+                    scheduleSeat6, scheduleSeat7, scheduleSeat8, scheduleSeat9, scheduleSeat10);
             List<Casting> castings = List.of(casting1, casting2, casting3, casting4, casting5);
 
             Long scheduleId = 1L;
@@ -218,8 +254,8 @@ class MusicalServiceTest {
             assertEquals(1, responseValue.getSumVIP());
             assertEquals(2, responseValue.getSumR());
             assertEquals(2, responseValue.getSumS());
-            assertEquals(0, responseValue.getSumA());
-            assertEquals(0, responseValue.getSumB());
+            assertEquals(1, responseValue.getSumA());
+            assertEquals(1, responseValue.getSumB());
             assertEquals(3, responseValue.getSumC());
             assertEquals(List.of(actor, actor, actor, actor, actor), responseValue.getActors());
             assertEquals(actor, responseValue.getActors().get(1));
