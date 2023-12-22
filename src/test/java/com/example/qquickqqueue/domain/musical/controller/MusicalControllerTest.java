@@ -63,6 +63,7 @@ class MusicalControllerTest {
     @DisplayName("readMusicals Method Test")
     class ReadMusicals {
         @Test
+        @DisplayName("readMusicals Method Test")
         void readMusicalsTest() {
             // given
             Pageable pageable = PageRequest.of(0, 10);
@@ -95,6 +96,7 @@ class MusicalControllerTest {
     @DisplayName("readMusical Method Test")
     class ReadMusical {
         @Test
+        @DisplayName("readMusical Method Test")
         void readMusicalTest() {
             // given
             Long musicalId = 1L;
@@ -175,6 +177,40 @@ class MusicalControllerTest {
             assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
             assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
 
+        }
+    }
+
+    @Nested
+    @DisplayName("searchMusicals Method Test")
+    class SearchMusicals {
+        @Test
+        void searchMusicalsTest() {
+            // given
+            Pageable pageable = PageRequest.of(0, 10);
+
+            String searchKeyword = "musical";
+
+            Page<MusicalResponseDto> musicalResponseDtoPage = new PageImpl<>(musicalList.stream().map(musical -> MusicalResponseDto.builder()
+                    .title(musical.getTitle())
+                    .thumbnailUrl(musical.getThumbnailUrl())
+                    .rating(musical.getRating())
+                    .description(musical.getDescription())
+                    .startDate(musical.getStartDate())
+                    .endDate(musical.getEndDate())
+                    .runningTime(musical.getRunningTime())
+                    .build()).toList());
+
+            ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("조회 성공", musicalResponseDtoPage), HttpStatus.OK);
+            when(musicalService.searchMusicals(searchKeyword, pageable)).thenReturn(responseEntity);
+
+            // when
+            ResponseEntity<Message> response = musicalController.searchMusicals(searchKeyword, pageable);
+            Page<MusicalResponseDto> responseValue = (Page<MusicalResponseDto>) response.getBody().getData();
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
+            assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
         }
     }
 }

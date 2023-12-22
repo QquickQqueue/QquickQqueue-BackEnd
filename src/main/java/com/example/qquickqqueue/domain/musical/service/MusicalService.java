@@ -56,7 +56,8 @@ public class MusicalService {
                 .endDate(musical.getEndDate())
                 .runningTime(musical.getRunningTime())
                 .scheduleList(scheduleRepository.findAllByMusical_Id(musicalId)
-                        .stream().map(schedule -> ScheduleResponseDto.builder()
+                        .stream()
+                        .map(schedule -> ScheduleResponseDto.builder()
                                 .id(schedule.getId())
                                 .startTime(schedule.getStartTime())
                                 .endTime(schedule.getEndTime())
@@ -69,13 +70,13 @@ public class MusicalService {
         List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false);
         int vip = 0, r = 0, s = 0, a = 0, b = 0, c = 0;
         for (ScheduleSeat seat : scheduleSeats) {
-            switch(seat.getSeatGrade().getGrade()) {
+            switch (seat.getSeatGrade().getGrade()) {
                 case VIP -> vip++;
                 case R -> r++;
                 case S -> s++;
                 case A -> a++;
                 case B -> b++;
-                case C -> c++;
+                default -> c++;
             }
         }
         return new ResponseEntity<>(new Message("조회 성공", MusicalRoundInfoResponseDto.builder()
@@ -98,5 +99,19 @@ public class MusicalService {
                         .columnNum(scheduleSeat.getSeat().getColumnNum())
                         .rowNum(scheduleSeat.getSeat().getRowNum())
                         .build()).toList()), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Message> searchMusicals(String title, Pageable pageable) {
+        return new ResponseEntity<>(new Message("조회 성공", musicalRepository.findAllByTitleContaining(title, pageable)
+                .map(musical -> MusicalResponseDto.builder()
+                        .id(musical.getId())
+                        .title(musical.getTitle())
+                        .thumbnailUrl(musical.getThumbnailUrl())
+                        .rating(musical.getRating())
+                        .description(musical.getDescription())
+                        .startDate(musical.getStartDate())
+                        .endDate(musical.getEndDate())
+                        .runningTime(musical.getRunningTime())
+                        .build())), HttpStatus.OK);
     }
 }
