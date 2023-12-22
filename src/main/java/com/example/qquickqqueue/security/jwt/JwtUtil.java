@@ -71,7 +71,7 @@ public class JwtUtil {
 				.claim("email", members.getEmail())
 				.claim("name", members.getName())
 				.claim("gender", members.getGender())
-				.claim("birth", members.getBirth())
+				.claim("birth", members.getBirth().toString())
 				.claim("phoneNumber", members.getPhoneNumber())
 				.signWith(key)
 				.setIssuedAt(date)
