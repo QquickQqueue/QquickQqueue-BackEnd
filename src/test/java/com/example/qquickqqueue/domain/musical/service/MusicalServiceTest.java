@@ -81,6 +81,7 @@ class MusicalServiceTest {
     @DisplayName("readMusicals Method Test")
     class ReadMusicals {
         @Test
+        @DisplayName("readMusicals Method Test")
         void readMusicalsTest() {
             // given
             Pageable pageable = PageRequest.of(0, 10);
@@ -335,6 +336,41 @@ class MusicalServiceTest {
 
             assertEquals(scheduleSeatResponseDto1.getRowNum(), responseValue.get(0).getRowNum());
             assertEquals(scheduleSeatResponseDto2.getRowNum(), responseValue.get(1).getRowNum());
+        }
+    }
+
+    @Nested
+    @DisplayName("searchMusicals Method Test")
+    class SearchMusicals {
+        @Test
+        @DisplayName("searchMusicals Method Test")
+        void searchMusicalsTest() {
+            // given
+            Pageable pageable = PageRequest.of(0, 10);
+            String searchKeyword = "musical";
+
+            Page<Musical> musicalPage = new PageImpl<>(musicalList);
+
+            when(musicalRepository.findAllByTitleContaining(searchKeyword, pageable)).thenReturn(musicalPage);
+
+            Page<MusicalResponseDto> musicalResponseDtoPage = new PageImpl<>(musicalList.stream().map(musical -> MusicalResponseDto.builder()
+                    .title(musical.getTitle())
+                    .thumbnailUrl(musical.getThumbnailUrl())
+                    .rating(musical.getRating())
+                    .description(musical.getDescription())
+                    .startDate(musical.getStartDate())
+                    .endDate(musical.getEndDate())
+                    .runningTime(musical.getRunningTime())
+                    .build()).toList());
+
+            // when
+            ResponseEntity<Message> response = musicalService.searchMusicals(searchKeyword, pageable);
+            Page<MusicalResponseDto> responseValue = (Page<MusicalResponseDto>) response.getBody().getData();
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
+            assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
         }
     }
 }
