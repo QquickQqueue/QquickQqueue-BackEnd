@@ -2,11 +2,13 @@ package com.example.qquickqqueue.domain.musical.controller;
 
 import com.example.qquickqqueue.domain.actor.entity.Actor;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
+import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.service.MusicalService;
+import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.util.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -132,6 +134,47 @@ class MusicalControllerTest {
             // then
             assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
             assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusicalSeatInfo Method Test")
+    class ReadMusicalSeatInfo {
+        @Test
+        @DisplayName("readMusicalSeatInfo Method Test")
+        void readMusicalSeatInfoTest() {
+            // given
+            ScheduleSeatResponseDto scheduleSeatResponseDto1 = ScheduleSeatResponseDto.builder()
+                    .id(1L)
+                    .isReserved(false)
+                    .grade(Grade.R)
+                    .price(12222)
+                    .columnNum(2)
+                    .rowNum(3)
+                    .build();
+            ScheduleSeatResponseDto scheduleSeatResponseDto2 = ScheduleSeatResponseDto.builder()
+                    .id(2L)
+                    .isReserved(false)
+                    .grade(Grade.VIP)
+                    .price(1222332)
+                    .columnNum(34)
+                    .rowNum(35)
+                    .build();
+
+            Long scheduleId = 1L;
+
+            ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("조회 성공",
+                    List.of(scheduleSeatResponseDto1, scheduleSeatResponseDto2)), HttpStatus.OK);
+
+            when(musicalService.readMusicalSeatInfo(scheduleId)).thenReturn(responseEntity);
+
+            // when
+            ResponseEntity<Message> response = musicalController.readMusicalSeatInfo(scheduleId);
+
+            // then
+            assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
+            assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
+
         }
     }
 }

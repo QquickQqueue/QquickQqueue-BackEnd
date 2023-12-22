@@ -11,6 +11,7 @@ import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
+import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
@@ -205,7 +206,7 @@ class MusicalServiceTest {
 
             Long scheduleId = 1L;
 
-            when(scheduleSeatRepository.findAllBySchedule_IdAndReserved(scheduleId, false)).thenReturn(scheduleSeats);
+            when(scheduleSeatRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false)).thenReturn(scheduleSeats);
             when(castingRepository.findAllBySchedule_Id(scheduleId)).thenReturn(castings);
 
             // when
@@ -222,6 +223,82 @@ class MusicalServiceTest {
             assertEquals(3, responseValue.getSumC());
             assertEquals(List.of(actor, actor, actor, actor, actor), responseValue.getActors());
             assertEquals(actor, responseValue.getActors().get(1));
+        }
+    }
+
+    @Nested
+    @DisplayName("readMusicalSeatInfo Method Test")
+    class ReadMusicalSeatInfo {
+        @Test
+        @DisplayName("readMusicalSeatInfo Method Test")
+        void readMusicalSeatInfoTest() {
+            // given
+            Actor actor = new Actor(1L, "name", Gender.MALE);
+
+            Seat seat1 = Seat.builder()
+                    .id(1L).columnNum(1).rowNum(3).stadium(new Stadium(1L, "name", "address"))
+                    .build();
+            Seat seat2 = Seat.builder()
+                    .id(1L).columnNum(2).rowNum(4).stadium(new Stadium(1L, "name", "address"))
+                    .build();
+
+            SeatGrade seatGrade1 = new SeatGrade(1L, Grade.R, 1000);
+            SeatGrade seatGrade2 = new SeatGrade(2L, Grade.VIP, 1000);
+
+            Schedule schedule1 = Schedule.builder()
+                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).actor(actor).musical(musical).isDeleted(false)
+                    .build();
+
+            ScheduleSeat scheduleSeat1 = ScheduleSeat.builder()
+                    .id(1L).isReserved(false).seat(seat1).seatGrade(seatGrade1).schedule(schedule1)
+                    .build();
+            ScheduleSeat scheduleSeat2 = ScheduleSeat.builder()
+                    .id(2L).isReserved(false).seat(seat2).seatGrade(seatGrade2).schedule(schedule1)
+                    .build();
+
+            List<ScheduleSeat> scheduleSeats = List.of(scheduleSeat1, scheduleSeat2);
+
+            ScheduleSeatResponseDto scheduleSeatResponseDto1 = ScheduleSeatResponseDto.builder()
+                    .id(scheduleSeat1.getId())
+                    .isReserved(scheduleSeat1.isReserved())
+                    .grade(scheduleSeat1.getSeatGrade().getGrade())
+                    .price(scheduleSeat1.getSeatGrade().getPrice())
+                    .columnNum(scheduleSeat1.getSeat().getColumnNum())
+                    .rowNum(scheduleSeat1.getSeat().getRowNum())
+                    .build();
+            ScheduleSeatResponseDto scheduleSeatResponseDto2 = ScheduleSeatResponseDto.builder()
+                    .id(scheduleSeat2.getId())
+                    .isReserved(scheduleSeat2.isReserved())
+                    .grade(scheduleSeat2.getSeatGrade().getGrade())
+                    .price(scheduleSeat2.getSeatGrade().getPrice())
+                    .columnNum(scheduleSeat2.getSeat().getColumnNum())
+                    .rowNum(scheduleSeat2.getSeat().getRowNum())
+                    .build();
+
+            Long scheduleId = 1L;
+
+            when(scheduleSeatRepository.findAllBySchedule_Id(scheduleId)).thenReturn(scheduleSeats);
+
+            // when
+            ResponseEntity<Message> response = musicalService.readMusicalSeatInfo(scheduleId);
+            List<ScheduleSeatResponseDto> responseValue = (List<ScheduleSeatResponseDto>) response.getBody().getData();
+
+            // then
+            assertEquals("조회 성공", response.getBody().getMessage());
+            assertEquals(scheduleSeatResponseDto1.getId(), responseValue.get(0).getId());
+            assertEquals(scheduleSeatResponseDto2.getId(), responseValue.get(1).getId());
+
+            assertEquals(scheduleSeatResponseDto1.getGrade(), responseValue.get(0).getGrade());
+            assertEquals(scheduleSeatResponseDto2.getGrade(), responseValue.get(1).getGrade());
+
+            assertEquals(scheduleSeatResponseDto1.getPrice(), responseValue.get(0).getPrice());
+            assertEquals(scheduleSeatResponseDto2.getPrice(), responseValue.get(1).getPrice());
+
+            assertEquals(scheduleSeatResponseDto1.getColumnNum(), responseValue.get(0).getColumnNum());
+            assertEquals(scheduleSeatResponseDto2.getColumnNum(), responseValue.get(1).getColumnNum());
+
+            assertEquals(scheduleSeatResponseDto1.getRowNum(), responseValue.get(0).getRowNum());
+            assertEquals(scheduleSeatResponseDto2.getRowNum(), responseValue.get(1).getRowNum());
         }
     }
 }

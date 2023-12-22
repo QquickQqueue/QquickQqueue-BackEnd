@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ScheduleSeatRepository extends JpaRepository<ScheduleSeat, Long> {
-    List<ScheduleSeat> findAllBySchedule_IdAndReserved(Long scheduleId, boolean isReserved);
+    List<ScheduleSeat> findAllBySchedule_IdAndIsReserved(Long scheduleId, boolean isReserved);
+    List<ScheduleSeat> findAllBySchedule_Id(Long scheduleId);
 }
