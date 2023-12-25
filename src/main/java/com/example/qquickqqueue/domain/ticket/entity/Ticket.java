@@ -56,4 +56,8 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SEAT_ID")
     private Seat seat;
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 }

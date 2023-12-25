@@ -3,11 +3,13 @@ package com.example.qquickqqueue.domain.seatGrade.entity;
 import com.example.qquickqqueue.domain.enumPackage.Grade;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SeatGrade {
