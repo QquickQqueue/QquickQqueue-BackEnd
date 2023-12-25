@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.members.dto.request.LoginRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.SignupRequestDto;
+import com.example.qquickqqueue.domain.members.dto.request.WithdrawalDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
 import com.example.qquickqqueue.redis.util.RedisUtil;

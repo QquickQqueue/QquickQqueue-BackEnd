@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.members.dto.request.LoginRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.SignupRequestDto;
+import com.example.qquickqqueue.domain.members.dto.request.WithdrawalDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.service.MembersService;
 import com.example.qquickqqueue.security.userDetails.UserDetailsImpl;
@@ -116,6 +117,28 @@ class MembersControllerTest {
 			//then
 			assertEquals(HttpStatus.OK, response.getStatusCode());
 			assertEquals("로그아웃 성공", response.getBody().getMessage());
+		}
+	}
+
+	@Nested
+	@DisplayName("회원탈퇴")
+	class Withdrawal {
+		@Test
+		@DisplayName("회원탈퇴")
+		void withdrawalControllerTest() {
+			//given
+			WithdrawalDto withdrawalDto = WithdrawalDto.builder()
+				.password("password").build();
+
+			ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("회원탈퇴 성공", null), HttpStatus.OK);
+			when(membersService.withdrawal(withdrawalDto, userDetails.getMember())).thenReturn(responseEntity);
+
+			//when
+			ResponseEntity<Message> response = membersController.withdrawal(withdrawalDto, userDetails);
+
+			//then
+			assertEquals(HttpStatus.OK, response.getStatusCode());
+			assertEquals("회원탈퇴 성공", response.getBody().getMessage());
 		}
 	}
 }
