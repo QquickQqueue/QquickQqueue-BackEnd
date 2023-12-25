@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.members.controller;
 
 import com.example.qquickqqueue.domain.members.dto.request.LoginRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.SignupRequestDto;
+import com.example.qquickqqueue.domain.members.dto.request.WithdrawalDto;
 import com.example.qquickqqueue.domain.members.service.MembersService;
 import com.example.qquickqqueue.security.userDetails.UserDetailsImpl;
 import com.example.qquickqqueue.util.Message;
@@ -43,5 +44,12 @@ public class MembersController {
 	public ResponseEntity<Message> logout(@AuthenticationPrincipal UserDetailsImpl userDetails,
 		HttpServletRequest httpServletRequest) {
 		return membersService.logout(userDetails.getMember(), httpServletRequest);
+	}
+
+	// 회원 탈퇴
+	@PostMapping("/withdrawal")
+	public ResponseEntity<Message> withdrawal(@RequestBody WithdrawalDto withdrawalDto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return membersService.withdrawal(withdrawalDto, userDetails.getMember());
 	}
 }
