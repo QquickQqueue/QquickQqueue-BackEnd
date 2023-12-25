@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.members.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 
 import com.example.qquickqqueue.domain.enumPackage.Gender;
@@ -53,6 +54,16 @@ class MembersServiceTest {
 		.gender(Gender.FEMALE)
 		.birth(LocalDate.now())
 		.phoneNumber("010-123-1234")
+		.build();
+
+	Members withdrawalMember = Members.builder()
+		.email("test@test.com")
+		.password("test1234")
+		.name("tester")
+		.gender(Gender.FEMALE)
+		.birth(LocalDate.now())
+		.phoneNumber("010-123-1234")
+		.outDate(LocalDate.now())
 		.build();
 
 	@Nested
@@ -189,6 +200,22 @@ class MembersServiceTest {
 			assertEquals("사용자를 찾을 수 없습니다. email : " + requestDto.getEmail(),
 				exception.getMessage());
 		}
+
+		@Test
+		@DisplayName("이미 탈퇴한 이메일")
+		void login_already_joinedEMail() {
+
+			LoginRequestDto requestDto = LoginRequestDto.builder()
+				.email("test@test.com").password("test1234").build();
+
+			when(membersRepository.findByEmail(requestDto.getEmail())).thenReturn(
+				Optional.of(withdrawalMember));
+
+			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> membersService.login(requestDto, httpServletResponse));
+
+			assertEquals("이미 탈퇴한 이메일입니다. email : " + requestDto.getEmail(), exception.getMessage());
+		}
 	}
 
 	@Nested
@@ -230,6 +257,45 @@ class MembersServiceTest {
 				() -> membersService.logout(member, httpServletRequest));
 			assertEquals("유저를 찾지 못했습니다. email : " + member.getEmail(), exception.getMessage());
 
+		}
+	}
+
+	@Nested
+	@DisplayName("회원탈퇴")
+	class withdrawal {
+
+		@Test
+		@DisplayName("회원 탈퇴 성공")
+		void withdrawal () {
+			// given
+			WithdrawalDto withdrawalDto = WithdrawalDto.builder()
+				.password("right password").build();
+
+			when(passwordEncoder.matches(withdrawalDto.getPassword(),
+				member.getPassword())).thenReturn(true);
+
+			// when
+			ResponseEntity<Message> response = membersService.withdrawal(withdrawalDto, member);
+
+			// then
+			assertEquals(HttpStatus.OK, response.getStatusCode());
+			assertEquals("회원탈퇴 성공", response.getBody().getMessage());
+		}
+
+		@Test
+		@DisplayName("회원 탈퇴 실패(비밀번호 틀림)")
+		void withdrawal_password_wrong() {
+			// given
+			WithdrawalDto withdrawalDto = WithdrawalDto.builder()
+				.password("wrong password").build();
+
+			when(passwordEncoder.matches(withdrawalDto.getPassword(), member.getPassword())).thenReturn(false);
+
+			// when
+			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> membersService.withdrawal(withdrawalDto, member));
+
+			// then
+			assertEquals("비밀번호를 틀렸습니다.", exception.getMessage());
 		}
 	}
 }
