@@ -45,4 +45,8 @@ public class Members extends Timestamped {
 
     @Column
     private LocalDate outDate;
+
+    public void updateDate() {
+        this.outDate = LocalDate.now();
+    }
 }

@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.members.service;
 
 import com.example.qquickqqueue.domain.members.dto.request.LoginRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.SignupRequestDto;
+import com.example.qquickqqueue.domain.members.dto.request.WithdrawalDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
 import com.example.qquickqqueue.redis.util.RedisUtil;
@@ -11,6 +12,7 @@ import com.example.qquickqqueue.util.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -63,7 +65,9 @@ public class MembersService {
 		Members member = membersRepository.findByEmail(email).orElseThrow(
 			() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다. email : " + email)
 		);
-
+		if (member.getOutDate() != null) {
+			throw new IllegalArgumentException("이미 탈퇴한 이메일입니다. email : " + email);
+		}
 		// 비밀번호 틀렸을 때
 		if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
 			throw new IllegalArgumentException("비밀번호를 틀렸습니다.");
@@ -91,6 +95,18 @@ public class MembersService {
 			return new ResponseEntity<>(new Message("로그아웃 성공", null), HttpStatus.OK);
 		} else {
 			throw new UsernameNotFoundException("유저를 찾지 못했습니다. email : " + member.getEmail());
+		}
+	}
+
+	// 회원탈퇴
+	@Transactional
+	public ResponseEntity<Message> withdrawal(WithdrawalDto withdrawalDto, Members member) {
+		if (!passwordEncoder.matches(withdrawalDto.getPassword(), member.getPassword())) {
+			throw new IllegalArgumentException("비밀번호를 틀렸습니다.");
+		} else {
+			member.updateDate();
+			membersRepository.save(member);
+			return new ResponseEntity<>(new Message("회원탈퇴 성공", null), HttpStatus.OK);
 		}
 	}
 }
