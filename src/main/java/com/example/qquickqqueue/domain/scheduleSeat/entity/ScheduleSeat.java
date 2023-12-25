@@ -38,4 +38,8 @@ public class ScheduleSeat {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SEAT_GRADE_ID")
     private SeatGrade seatGrade;
+
+    public void setReserved(boolean isReserved) {
+        this.isReserved = isReserved;
+    }
 }
