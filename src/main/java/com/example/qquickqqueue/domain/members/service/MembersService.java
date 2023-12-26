@@ -3,6 +3,7 @@ package com.example.qquickqqueue.domain.members.service;
 import com.example.qquickqqueue.domain.members.dto.request.LoginRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.SignupRequestDto;
 import com.example.qquickqqueue.domain.members.dto.request.WithdrawalDto;
+import com.example.qquickqqueue.domain.members.dto.response.MemberInfoResponseDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
 import com.example.qquickqqueue.redis.util.RedisUtil;
@@ -11,9 +12,6 @@ import com.example.qquickqqueue.security.jwt.TokenDto;
 import com.example.qquickqqueue.util.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -108,5 +109,19 @@ public class MembersService {
 			membersRepository.save(member);
 			return new ResponseEntity<>(new Message("회원탈퇴 성공", null), HttpStatus.OK);
 		}
+	}
+
+	public ResponseEntity<Message> getMemberInfo(Members members) {
+		Members memberInfo = membersRepository.findByEmail(members.getEmail())
+				.orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다. email : " + members.getEmail()));
+
+		return new ResponseEntity<>(new Message("회원정보 조회 성공", MemberInfoResponseDto.builder()
+				.email(memberInfo.getEmail())
+				.name(memberInfo.getName())
+				.gender(memberInfo.getGender())
+				.birth(memberInfo.getBirth())
+				.phoneNumber(memberInfo.getPhoneNumber())
+				.createAt(memberInfo.getCreateAt())
+				.build()), HttpStatus.OK);
 	}
 }
