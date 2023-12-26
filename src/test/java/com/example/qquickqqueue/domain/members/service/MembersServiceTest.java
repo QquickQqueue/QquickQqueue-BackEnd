@@ -18,6 +18,7 @@ import com.example.qquickqqueue.util.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -297,6 +298,34 @@ class MembersServiceTest {
 
 			// then
 			assertEquals("비밀번호를 틀렸습니다.", exception.getMessage());
+		}
+	}
+
+	@Nested
+	@DisplayName("회원정보 조회")
+	class GetMemberInfo {
+		@Test
+		@DisplayName("회원정보 조회 성공")
+		void getMemberInfoSuccess() {
+			// given
+			when(membersRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+
+			// when
+			ResponseEntity<Message> response = membersService.getMemberInfo(member);
+
+			// then
+			assertEquals(HttpStatus.OK, response.getStatusCode());
+			assertEquals("회원정보 조회 성공", Objects.requireNonNull(response.getBody()).getMessage());
+		}
+
+		@Test
+		@DisplayName("회원정보 조회 실패(유저 못 찾음)")
+		void getMemberInfoFailure_MemberNotFound() {
+			// given
+			when(membersRepository.findByEmail(member.getEmail())).thenReturn(Optional.empty());
+
+			// when & then
+			assertThrows(UsernameNotFoundException.class, () -> membersService.getMemberInfo(member));
 		}
 	}
 }

@@ -15,6 +15,8 @@ import com.example.qquickqqueue.util.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.Objects;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -139,6 +141,25 @@ class MembersControllerTest {
 			//then
 			assertEquals(HttpStatus.OK, response.getStatusCode());
 			assertEquals("회원탈퇴 성공", response.getBody().getMessage());
+		}
+	}
+
+	@Nested
+	@DisplayName("회원정보 조회")
+	class GetMemberInfo {
+		@Test
+		@DisplayName("회원정보 조회 컨트롤러 테스트")
+		void getMemberInfoControllerTest() {
+			// given
+			ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("회원정보 조회 성공", null), HttpStatus.OK);
+			when(membersService.getMemberInfo(userDetails.getMember())).thenReturn(responseEntity);
+
+			// when
+			ResponseEntity<Message> response = membersController.getMemberInfo(userDetails);
+
+			// then
+			assertEquals(HttpStatus.OK, response.getStatusCode());
+			assertEquals("회원정보 조회 성공", Objects.requireNonNull(response.getBody()).getMessage());
 		}
 	}
 }

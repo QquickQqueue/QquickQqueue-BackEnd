@@ -68,6 +68,7 @@ public class TicketService {
         return new ResponseEntity<>(new Message("티켓 예매 성공", responseDto), HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity<Message> cancelTicket(Long ticketId) {
         Optional<Ticket> optionalTicket = ticketRepository.findById(ticketId);
 

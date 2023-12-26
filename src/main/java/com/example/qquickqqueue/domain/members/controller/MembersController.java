@@ -12,11 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,5 +47,10 @@ public class MembersController {
 	public ResponseEntity<Message> withdrawal(@RequestBody WithdrawalDto withdrawalDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return membersService.withdrawal(withdrawalDto, userDetails.getMember());
+	}
+
+	@GetMapping("/members")
+	public ResponseEntity<Message> getMemberInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return membersService.getMemberInfo(userDetails.getMember());
 	}
 }
