@@ -46,7 +46,14 @@ public class Members extends Timestamped {
     @Column
     private LocalDate outDate;
 
+    @Column(nullable = false)
+    private boolean isKakaoEmail;
+
     public void updateDate() {
         this.outDate = LocalDate.now();
+    }
+
+    public void setIsKakaoEmail() {
+        this.isKakaoEmail = !isKakaoEmail;
     }
 }
