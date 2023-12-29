@@ -49,4 +49,8 @@ public class Members extends Timestamped {
     public void updateDate() {
         this.outDate = LocalDate.now();
     }
+
+    public void setIsKakaoEmail() {
+        this.isKakaoEmail = !isKakaoEmail;
+    }
 }
