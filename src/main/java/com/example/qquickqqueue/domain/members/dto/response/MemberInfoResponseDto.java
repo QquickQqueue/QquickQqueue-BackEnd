@@ -16,4 +16,5 @@ public class MemberInfoResponseDto {
     private LocalDate birth;
     private String phoneNumber;
     private LocalDateTime createAt;
+    private boolean isKakaoEmail;
 }

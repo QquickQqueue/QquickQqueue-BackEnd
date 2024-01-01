@@ -2,7 +2,6 @@ package com.example.qquickqqueue.domain.members.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 
 import com.example.qquickqqueue.domain.enumPackage.Gender;
@@ -90,6 +89,39 @@ class MembersServiceTest {
 			//then
 			assertEquals(HttpStatus.OK, response.getStatusCode());
 			assertEquals("회원가입 성공", response.getBody().getMessage());
+		}
+
+		@Test
+		@DisplayName("카카오 회원 가입 후 일반 회원가입")
+		void signup_kakao_success() {
+			// given
+			SignupRequestDto requestDto = SignupRequestDto.builder().email("kakao@test.com")
+				.password("test1234")
+				.name("tester")
+				.birth(LocalDate.now())
+				.gender(Gender.FEMALE)
+				.phoneNumber("010-123-1234")
+				.build();
+
+			Members kakaoMember = Members.builder()
+				.email("kakao@test.com")
+				.password("kakao")
+				.name("kakao")
+				.gender(Gender.FEMALE)
+				.birth(LocalDate.now())
+				.phoneNumber("010-1234-1234")
+				.isKakaoEmail(true)
+				.build();
+
+			String email = requestDto.getEmail();
+
+			// when
+			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
+			ResponseEntity<Message> response = membersService.signup(requestDto);
+
+			// then
+			assertEquals(HttpStatus.OK, response.getStatusCode());
+			assertEquals("카카오 연동 성공", response.getBody().getMessage());
 		}
 
 		@Test

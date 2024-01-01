@@ -62,9 +62,7 @@ public class JwtUtil {
 
 	public String createToken(Members members, String type) {
 		Date date = new Date();
-		long time;
 		if(type.equals("Access")) {
-			time = ACCESS_TIME;
 			return BEARER_PREFIX
 				+ Jwts.builder()
 				.setSubject(members.getEmail())
@@ -73,18 +71,18 @@ public class JwtUtil {
 				.claim("gender", members.getGender())
 				.claim("birth", members.getBirth().toString())
 				.claim("phoneNumber", members.getPhoneNumber())
+				.claim("isKakaoEmail", members.isKakaoEmail())
 				.signWith(key)
 				.setIssuedAt(date)
-				.setExpiration(new Date(date.getTime() + time))
+				.setExpiration(new Date(date.getTime() + ACCESS_TIME))
 				.compact();
 		} else {
-			time = REFRESH_TIME;
 			return BEARER_PREFIX
 				+ Jwts.builder()
 				.setSubject(members.getEmail())
 				.signWith(key)
 				.setIssuedAt(date)
-				.setExpiration(new Date(date.getTime() + time))
+				.setExpiration(new Date(date.getTime() + REFRESH_TIME))
 				.compact();
 		}
 	}

@@ -56,4 +56,8 @@ public class Members extends Timestamped {
     public void setIsKakaoEmail() {
         this.isKakaoEmail = !isKakaoEmail;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
