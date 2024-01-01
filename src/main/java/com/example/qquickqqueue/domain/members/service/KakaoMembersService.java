@@ -17,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,6 +35,7 @@ import static com.example.qquickqqueue.security.jwt.JwtUtil.REFRESH_KEY;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class KakaoMembersService {
     @Value("${kakao.api.key}")
@@ -49,8 +52,8 @@ public class KakaoMembersService {
     private final JwtUtil jwtUtil;
 
     public ResponseEntity<Message> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
-        String accessToken = getToken(code);
-        KakaoMemberInfoDto kakaoMemberInfoDto = getKakaoMemeberInfo(accessToken);
+//        String accessToken = getToken(code);
+        KakaoMemberInfoDto kakaoMemberInfoDto = getKakaoMemeberInfo(code);
 
         Members member = registerKakaoMemberIfNeeded(kakaoMemberInfoDto);
         TokenDto tokenDto = jwtUtil.createAllToken(member);
@@ -153,5 +156,27 @@ public class KakaoMembersService {
             }
         }
         return fMember;
+    }
+
+    public ResponseEntity<Message> kakaoWithdrawal(String code, HttpServletResponse response, Members member) throws JsonProcessingException {
+        String accessToken = getToken(code);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
+
+        RestTemplate rt = new RestTemplate();
+        ResponseEntity<String> responseEntity = rt.exchange(
+            "https://kapi.kakao.com/v1/user/unlink",
+            HttpMethod.POST, requestEntity, String.class);
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            member.updateDate();
+            membersRepository.save(member);
+            return new ResponseEntity<>(new Message("카카오 탈퇴 성공", null), HttpStatus.OK);
+        } else {
+            throw new HttpClientErrorException(responseEntity.getStatusCode());
+        }
     }
 }
