@@ -40,10 +40,16 @@ public class MembersService {
 		Optional<Members> findEmail = membersRepository.findByEmail(email);
 
 		if (findEmail.isPresent()) {
-			if (findEmail.get().getOutDate() != null) {
+			Members pMember = findEmail.get();
+			if (pMember.getOutDate() != null) {
 				throw new IllegalArgumentException("이미 탈퇴한 이메일입니다. email : " + email);
+			} else if (pMember.isKakaoEmail()) {
+				 pMember.setPassword(password);
+				 membersRepository.save(pMember);
+				 return new ResponseEntity<>(new Message("카카오 연동 성공", null), HttpStatus.OK);
+			} else {
+				throw new IllegalArgumentException("이미 존재하는 이메일입니다. email : " + email);
 			}
-			throw new IllegalArgumentException("이미 존재하는 이메일입니다. email : " + email);
 		}
 
 		Members member = Members.builder()
@@ -122,6 +128,7 @@ public class MembersService {
 				.birth(memberInfo.getBirth())
 				.phoneNumber(memberInfo.getPhoneNumber())
 				.createAt(memberInfo.getCreateAt())
+				.isKakaoEmail(memberInfo.isKakaoEmail())
 				.build()), HttpStatus.OK);
 	}
 }
