@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -19,8 +19,8 @@ public class MusicalResponseDto {
     private Rating rating;
     private String thumbnailUrl;
     private String description;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private Time runningTime;
     private List<ScheduleResponseDto> scheduleList;
 }
