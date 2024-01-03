@@ -17,7 +17,7 @@ public class MusicalController {
     private final MusicalService musicalService;
 
     @GetMapping("/musicals")
-    public ResponseEntity<Message> readMusicals(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+    public ResponseEntity<Message> readMusicals(@PageableDefault(page = 0, size = 8, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return musicalService.readMusicals(pageable);
     }
 
@@ -38,7 +38,7 @@ public class MusicalController {
 
     @GetMapping("/musicals/search")
     public ResponseEntity<Message> searchMusicals(@RequestParam String title,
-                                                  @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+                                                  @PageableDefault(page = 0, size = 8, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return musicalService.searchMusicals(title, pageable);
     }
 }
