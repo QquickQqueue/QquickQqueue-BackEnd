@@ -26,8 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,8 +45,8 @@ class MusicalControllerTest {
             .thumbnailUrl("musical.getThumbnailUrl()")
             .rating(Rating.PG12)
             .description("musical.getDescription()")
-            .startDate(new Date(2023, 3, 3))
-            .endDate(new Date(2023, 3, 3))
+            .startDate(LocalDate.of(2023, 3, 4))
+            .endDate(LocalDate.of(2023, 5, 4))
             .runningTime(new Time(32)).build();
 
     List<Musical> musicalList = new ArrayList<>();
