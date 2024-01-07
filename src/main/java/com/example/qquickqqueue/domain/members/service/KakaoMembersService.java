@@ -51,9 +51,8 @@ public class KakaoMembersService {
     private final RedisUtil redisUtil;
     private final JwtUtil jwtUtil;
 
-    public ResponseEntity<Message> kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
-//        String accessToken = getToken(code);
-        KakaoMemberInfoDto kakaoMemberInfoDto = getKakaoMemeberInfo(code);
+    public ResponseEntity<Message> kakaoLogin(String accessToken, HttpServletResponse response) throws JsonProcessingException {
+        KakaoMemberInfoDto kakaoMemberInfoDto = getKakaoMemeberInfo(accessToken);
 
         Members member = registerKakaoMemberIfNeeded(kakaoMemberInfoDto);
         TokenDto tokenDto = jwtUtil.createAllToken(member);

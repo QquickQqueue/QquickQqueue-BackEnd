@@ -18,8 +18,8 @@ public class KakaoMembersController {
     private final KakaoMembersService kakaoMembersService;
 
     @GetMapping("/api/kakao")
-    public ResponseEntity<Message> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response) throws JsonProcessingException {
-        return kakaoMembersService.kakaoLogin(code, response);
+    public ResponseEntity<Message> kakaoLogin(@RequestParam("accessToken") String accessToken, HttpServletResponse response) throws JsonProcessingException {
+        return kakaoMembersService.kakaoLogin(accessToken, response);
     }
 
     @GetMapping("/api/kakao/withdrawal")
