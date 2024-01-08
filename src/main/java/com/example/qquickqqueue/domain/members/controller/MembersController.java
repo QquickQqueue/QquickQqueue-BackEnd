@@ -36,7 +36,7 @@ public class MembersController {
 	}
 
 	// 로그 아웃
-	@GetMapping("logout")
+	@GetMapping("/logout")
 	public ResponseEntity<Message> logout(@AuthenticationPrincipal UserDetailsImpl userDetails,
 		HttpServletRequest httpServletRequest) {
 		return membersService.logout(userDetails.getMember(), httpServletRequest);
