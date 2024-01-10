@@ -4,7 +4,5 @@ public enum Grade {
     VIP,
     R,
     S,
-    A,
-    B,
-    C;
+    A;
 }

@@ -1,5 +1,6 @@
 package com.example.qquickqqueue.domain.seat.entity;
 
+import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,9 @@ public class Seat {
 
     @Column(nullable = false)
     private long columnNum;
+
+    @Column(nullable = false)
+    private Grade grade;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
