@@ -10,8 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class Musical {
     private LocalDate endDate;
 
     @Column(nullable = false)
-    private Time runningTime;
+    private LocalTime runningTime;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
