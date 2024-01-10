@@ -1,5 +1,6 @@
 package com.example.qquickqqueue.domain.musical.service;
 
+import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.actor.entity.Actor;
 import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
@@ -188,6 +189,7 @@ class MusicalServiceTest {
         void readMusicalRoundInfoByDateTest() {
             // given
             Actor actor = new Actor(1L, "name", Gender.MALE);
+            ActorResponseDto actorResponseDto = ActorResponseDto.builder().actorName("name").build();
 
             Schedule schedule = Schedule.builder()
                     .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).musical(musical).isDeleted(false)
@@ -247,8 +249,7 @@ class MusicalServiceTest {
             assertEquals(2, responseValue.getSumR());
             assertEquals(2, responseValue.getSumS());
             assertEquals(1, responseValue.getSumA());
-            assertEquals(List.of(actor, actor, actor, actor, actor), responseValue.getActors());
-            assertEquals(actor, responseValue.getActors().get(1));
+            assertEquals(actorResponseDto.getActorName(), responseValue.getActors().get(1).getActorName());
         }
     }
 
