@@ -15,7 +15,5 @@ public class MusicalRoundInfoResponseDto {
     private int sumR;
     private int sumS;
     private int sumA;
-    private int sumB;
-    private int sumC;
     private List<Actor> actors;
 }

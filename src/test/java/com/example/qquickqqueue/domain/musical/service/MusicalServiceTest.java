@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,10 +64,14 @@ class MusicalServiceTest {
             .title("musical.getTitle()")
             .thumbnailUrl("musical.getThumbnailUrl()")
             .rating(Rating.PG12)
+            .stadium(Stadium.builder()
+                    .stadiumName("여주")
+                    .build())
             .description("musical.getDescription()")
             .startDate(LocalDate.of(2023, 3, 4))
             .endDate(LocalDate.of(2023, 5, 4))
-            .runningTime(new Time(32)).build();
+            .runningTime(LocalTime.of(3, 3, 3))
+            .build();
 
     List<Musical> musicalList = new ArrayList<>();
 
@@ -122,13 +127,13 @@ class MusicalServiceTest {
 
             Actor actor = new Actor(1L, "name", Gender.MALE);
             Schedule schedule1 = Schedule.builder()
-                    .id(1L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .id(1L).musical(musical).isDeleted(false).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
                     .build();
             Schedule schedule2 = Schedule.builder()
-                    .id(2L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .id(2L).musical(musical).isDeleted(false).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
                     .build();
             Schedule schedule3 = Schedule.builder()
-                    .id(3L).musical(musical).isDeleted(false).actor(actor).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
+                    .id(3L).musical(musical).isDeleted(false).startTime(LocalDateTime.now()).endTime(LocalDateTime.now())
                     .build();
 
             List<Schedule> schedules = List.of(schedule1, schedule2, schedule3);
@@ -198,11 +203,7 @@ class MusicalServiceTest {
             SeatGrade seatGrade3 = new SeatGrade(3L, Grade.VIP, 1000);
             SeatGrade seatGrade4 = new SeatGrade(4L, Grade.S, 1000);
             SeatGrade seatGrade5 = new SeatGrade(5L, Grade.S, 1000);
-            SeatGrade seatGrade6 = new SeatGrade(6L, Grade.C, 1000);
-            SeatGrade seatGrade7 = new SeatGrade(7L, Grade.C, 1000);
-            SeatGrade seatGrade8 = new SeatGrade(8L, Grade.C, 1000);
             SeatGrade seatGrade9 = new SeatGrade(8L, Grade.A, 1000);
-            SeatGrade seatGrade10 = new SeatGrade(8L, Grade.B, 1000);
 
             ScheduleSeat scheduleSeat1 = ScheduleSeat.builder()
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade1).isReserved(false).build();
@@ -214,16 +215,8 @@ class MusicalServiceTest {
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade4).isReserved(false).build();
             ScheduleSeat scheduleSeat5 = ScheduleSeat.builder()
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade5).isReserved(false).build();
-            ScheduleSeat scheduleSeat6 = ScheduleSeat.builder()
-                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade6).isReserved(false).build();
-            ScheduleSeat scheduleSeat7 = ScheduleSeat.builder()
-                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade7).isReserved(false).build();
-            ScheduleSeat scheduleSeat8 = ScheduleSeat.builder()
-                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade8).isReserved(false).build();
             ScheduleSeat scheduleSeat9 = ScheduleSeat.builder()
                     .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade9).isReserved(false).build();
-            ScheduleSeat scheduleSeat10 = ScheduleSeat.builder()
-                    .id(1L).schedule(schedule).seat(seat).seatGrade(seatGrade10).isReserved(false).build();
 
             Casting casting1 = Casting.builder()
                     .id(1L).actor(actor).musical(musical).schedule(schedule).build();
@@ -237,8 +230,7 @@ class MusicalServiceTest {
                     .id(1L).actor(actor).musical(musical).schedule(schedule).build();
 
 
-            List<ScheduleSeat> scheduleSeats = List.of(scheduleSeat1, scheduleSeat2, scheduleSeat3, scheduleSeat4, scheduleSeat5,
-                    scheduleSeat6, scheduleSeat7, scheduleSeat8, scheduleSeat9, scheduleSeat10);
+            List<ScheduleSeat> scheduleSeats = List.of(scheduleSeat1, scheduleSeat2, scheduleSeat3, scheduleSeat4, scheduleSeat5, scheduleSeat9);
             List<Casting> castings = List.of(casting1, casting2, casting3, casting4, casting5);
 
             Long scheduleId = 1L;
@@ -256,8 +248,6 @@ class MusicalServiceTest {
             assertEquals(2, responseValue.getSumR());
             assertEquals(2, responseValue.getSumS());
             assertEquals(1, responseValue.getSumA());
-            assertEquals(1, responseValue.getSumB());
-            assertEquals(3, responseValue.getSumC());
             assertEquals(List.of(actor, actor, actor, actor, actor), responseValue.getActors());
             assertEquals(actor, responseValue.getActors().get(1));
         }
