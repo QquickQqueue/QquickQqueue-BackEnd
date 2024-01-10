@@ -34,7 +34,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -191,7 +190,7 @@ class MusicalServiceTest {
             Actor actor = new Actor(1L, "name", Gender.MALE);
 
             Schedule schedule = Schedule.builder()
-                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).actor(actor).musical(musical).isDeleted(false)
+                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).musical(musical).isDeleted(false)
                     .build();
 
             Seat seat = Seat.builder()
@@ -273,7 +272,7 @@ class MusicalServiceTest {
             SeatGrade seatGrade2 = new SeatGrade(2L, Grade.VIP, 1000);
 
             Schedule schedule1 = Schedule.builder()
-                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).actor(actor).musical(musical).isDeleted(false)
+                    .id(1L).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).musical(musical).isDeleted(false)
                     .build();
 
             ScheduleSeat scheduleSeat1 = ScheduleSeat.builder()
