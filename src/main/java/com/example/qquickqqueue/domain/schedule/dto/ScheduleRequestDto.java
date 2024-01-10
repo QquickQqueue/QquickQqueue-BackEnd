@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -12,4 +13,5 @@ import java.time.LocalDateTime;
 public class ScheduleRequestDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private List<String> actorName;
 }

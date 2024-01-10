@@ -45,6 +45,7 @@ public class MusicalService {
     private final SeatGradeRepository seatGradeRepository;
     private final StadiumRepository stadiumRepository;
     private final SeatRepository seatRepository;
+    private final ActorRepository actorRepository;
 
     public ResponseEntity<Message> readMusicals(Pageable pageable) {
         return new ResponseEntity<>(new Message("조회 성공", musicalRepository.findAll(pageable)
@@ -160,19 +161,35 @@ public class MusicalService {
                 .rating(musicalSaveRequestDto.getRating())
                 .build());
 
-        List<Schedule> scheduleList = scheduleRepository.saveAll(musicalSaveRequestDto.getScheduleList()
-                .stream().map(s -> Schedule.builder()
-                        .startTime(s.getStartTime())
-                        .endTime(s.getEndTime())
-                        .musical(musical)
-                        .build()
-                ).toList());
-
         List<SeatGrade> seatGradeList = seatGradeRepository.saveAll(
                 List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build()
                         , SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build()
                         , SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build()
                         , SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build())
+        );
+
+        List<Schedule> scheduleList = new ArrayList<>();
+
+        musicalSaveRequestDto.getScheduleList().forEach(scheduleRequestDto -> {
+                    Schedule schedule = scheduleRepository.save(Schedule.builder()
+                            .startTime(scheduleRequestDto.getStartTime())
+                            .endTime(scheduleRequestDto.getEndTime())
+                            .musical(musical)
+                            .build());
+                    scheduleList.add(schedule);
+
+                    scheduleRequestDto.getActorName().forEach(s -> {
+                        Actor actor = actorRepository.findByActorName(s).orElseThrow(
+                                () -> new IllegalArgumentException("등록되지 않은 배우입니다. 배우이름 : " + s)
+                        );
+
+                        castingRepository.save(Casting.builder()
+                                .schedule(schedule)
+                                .actor(actor)
+                                .musical(musical)
+                                .build());
+                    });
+                }
         );
 
         List<Seat> seatList = seatRepository.findAllByStadium(stadium);

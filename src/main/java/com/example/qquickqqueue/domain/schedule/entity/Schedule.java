@@ -1,6 +1,5 @@
 package com.example.qquickqqueue.domain.schedule.entity;
 
-import com.example.qquickqqueue.domain.actor.entity.Actor;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -35,9 +34,4 @@ public class Schedule {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MUSICAL_ID")
     private Musical musical;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ACTOR_ID")
-    private Actor actor;
 }
