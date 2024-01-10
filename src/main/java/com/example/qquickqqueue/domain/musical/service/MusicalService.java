@@ -1,5 +1,8 @@
 package com.example.qquickqqueue.domain.musical.service;
 
+import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
+import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.actor.repository.ActorRepository;
 import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
 import com.example.qquickqqueue.domain.enumPackage.Grade;
@@ -28,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,7 +100,9 @@ public class MusicalService {
                 .sumVIP(vip).sumR(r).sumS(s).sumA(a)
                 .actors(castingRepository.findAllBySchedule_Id(scheduleId)
                         .stream()
-                        .map(Casting::getActor)
+                        .map(c -> ActorResponseDto.builder()
+                                .actorName(c.getActor().getActorName())
+                                .build())
                         .toList())
                 .build()), HttpStatus.OK);
     }
