@@ -3,9 +3,13 @@ package com.example.qquickqqueue.domain.actor.entity;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Actor {
