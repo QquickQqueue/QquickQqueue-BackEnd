@@ -4,14 +4,23 @@ import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
+import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
+import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
+import com.example.qquickqqueue.domain.seat.entity.Seat;
+import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
+import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
+import com.example.qquickqqueue.domain.seatGrade.repository.SeatGradeRepository;
+import com.example.qquickqqueue.domain.stadium.entity.Stadium;
+import com.example.qquickqqueue.domain.stadium.repository.StadiumRepository;
 import com.example.qquickqqueue.util.Message;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -50,6 +59,7 @@ public class MusicalService {
                 .id(musical.getId())
                 .title(musical.getTitle())
                 .thumbnailUrl(musical.getThumbnailUrl())
+                .stadiumName(musical.getStadium().getStadiumName())
                 .rating(musical.getRating())
                 .description(musical.getDescription())
                 .startDate(musical.getStartDate())
