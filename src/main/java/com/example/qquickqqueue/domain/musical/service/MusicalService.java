@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.musical.service;
 
 import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
+import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
@@ -123,5 +124,69 @@ public class MusicalService {
                         .endDate(musical.getEndDate())
                         .runningTime(musical.getRunningTime())
                         .build())), HttpStatus.OK);
+    }
+
+    @Transactional
+    public ResponseEntity<Message> saveMusical(MusicalSaveRequestDto musicalSaveRequestDto) {
+        Long stadiumId = musicalSaveRequestDto.getStadiumId();
+
+        Optional<Musical> optionalMusical = musicalRepository.findByStartDateBetweenAndStadium_Id(
+                musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(), stadiumId
+        );
+
+        if (optionalMusical.isPresent())
+            throw new IllegalArgumentException("이미 등록된 뮤지컬이 있는 기간입니다.");
+
+        Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(
+                () -> new IllegalArgumentException("등록되지 않은 공연장입니다. Stadium Id : " + stadiumId)
+        );
+
+        Musical musical = musicalRepository.save(Musical.builder()
+                .title(musicalSaveRequestDto.getTitle())
+                .description(musicalSaveRequestDto.getDescription())
+                .thumbnailUrl(musicalSaveRequestDto.getThumbnailUrl())
+                .stadium(stadium)
+                .startDate(musicalSaveRequestDto.getStartDate())
+                .endDate(musicalSaveRequestDto.getEndDate())
+                .runningTime(musicalSaveRequestDto.getRunningTime())
+                .rating(musicalSaveRequestDto.getRating())
+                .build());
+
+        List<Schedule> scheduleList = scheduleRepository.saveAll(musicalSaveRequestDto.getScheduleList()
+                .stream().map(s -> Schedule.builder()
+                        .startTime(s.getStartTime())
+                        .endTime(s.getEndTime())
+                        .musical(musical)
+                        .build()
+                ).toList());
+
+        List<SeatGrade> seatGradeList = seatGradeRepository.saveAll(
+                List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build()
+                        , SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build()
+                        , SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build()
+                        , SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build())
+        );
+
+        List<Seat> seatList = seatRepository.findAllByStadium(stadium);
+
+        scheduleList.forEach(s ->
+                seatList.forEach(seat -> {
+                            SeatGrade seatGrade;
+                            switch (seat.getGrade()) {
+                                case VIP -> seatGrade = seatGradeList.get(0);
+                                case R -> seatGrade = seatGradeList.get(1);
+                                case S -> seatGrade = seatGradeList.get(2);
+                                default -> seatGrade = seatGradeList.get(3);
+                            }
+                            scheduleSeatRepository.save(ScheduleSeat.builder()
+                                    .isReserved(false)
+                                    .schedule(s)
+                                    .seat(seat)
+                                    .seatGrade(seatGrade)
+                                    .build());
+                        }
+                )
+        );
+        return new ResponseEntity<>(new Message("뮤지컬 등록 성공", null), HttpStatus.OK);
     }
 }
