@@ -1,5 +1,6 @@
 package com.example.qquickqqueue.domain.musical.controller;
 
+import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.service.MusicalService;
 import com.example.qquickqqueue.util.Message;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +41,10 @@ public class MusicalController {
     public ResponseEntity<Message> searchMusicals(@RequestParam String title,
                                                   @PageableDefault(page = 0, size = 8, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return musicalService.searchMusicals(title, pageable);
+    }
+
+    @PostMapping("/musicals")
+    public ResponseEntity<Message> saveMusical(@RequestBody MusicalSaveRequestDto musicalSaveRequestDto) {
+        return musicalService.saveMusical(musicalSaveRequestDto);
     }
 }

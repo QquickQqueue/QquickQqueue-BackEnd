@@ -1,7 +1,7 @@
 package com.example.qquickqqueue.domain.musical.dto;
 
 import com.example.qquickqqueue.domain.enumPackage.Rating;
-import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
+import com.example.qquickqqueue.domain.schedule.dto.ScheduleRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,15 +13,15 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MusicalResponseDto {
-    private Long id;
+public class MusicalSaveRequestDto {
     private String title;
-    private Rating rating;
-    private String stadiumName;
-    private String thumbnailUrl;
     private String description;
+    private String thumbnailUrl;
+    private Long stadiumId;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalTime runningTime;
-    private List<ScheduleResponseDto> scheduleList;
+    private Rating rating;
+    private List<ScheduleRequestDto> scheduleList;
+    private int priceOfVip, priceOfR, priceOfS, priceOfA;
 }

@@ -1,7 +1,6 @@
 package com.example.qquickqqueue.domain.musical.controller;
 
-import com.example.qquickqqueue.domain.actor.entity.Actor;
-import com.example.qquickqqueue.domain.enumPackage.Gender;
+import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
@@ -25,8 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +46,7 @@ class MusicalControllerTest {
             .description("musical.getDescription()")
             .startDate(LocalDate.of(2023, 3, 4))
             .endDate(LocalDate.of(2023, 5, 4))
-            .runningTime(new Time(32)).build();
+            .runningTime(LocalTime.of(3, 3, 3)).build();
 
     List<Musical> musicalList = new ArrayList<>();
 
@@ -122,7 +121,7 @@ class MusicalControllerTest {
         void readMusicalRoundInfoByDateTest() {
             // given
             ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("조회 성공", MusicalRoundInfoResponseDto.builder()
-                    .sumVIP(2).sumR(2).sumS(3).sumA(4).sumB(5).sumC(6).actors(List.of(new Actor(1L, "name", Gender.MALE)))
+                    .sumVIP(2).sumR(2).sumS(3).sumA(4).actors(List.of(ActorResponseDto.builder().actorName("name").build()))
                     .build()), HttpStatus.OK);
 
             Long scheduleId = 1L;

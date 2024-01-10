@@ -1,6 +1,6 @@
 package com.example.qquickqqueue.domain.musical.dto;
 
-import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +15,5 @@ public class MusicalRoundInfoResponseDto {
     private int sumR;
     private int sumS;
     private int sumA;
-    private int sumB;
-    private int sumC;
-    private List<Actor> actors;
+    private List<ActorResponseDto> actors;
 }

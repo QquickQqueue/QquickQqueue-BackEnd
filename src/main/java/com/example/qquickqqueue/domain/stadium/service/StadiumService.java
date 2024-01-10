@@ -1,5 +1,7 @@
 package com.example.qquickqqueue.domain.stadium.service;
 
+import com.example.qquickqqueue.domain.enumPackage.Grade;
+import com.example.qquickqqueue.domain.seat.dto.SeatRequestDto;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.stadium.dto.request.StadiumRequestDto;
@@ -11,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +26,14 @@ public class StadiumService {
                 .stadiumName(stadiumRequestDto.getStadiumName())
                 .address(stadiumRequestDto.getStadiumAddress())
                 .build());
-        IntStream.rangeClosed(1, stadiumRequestDto.getMaxRowNum()).boxed()
-                .flatMap(i -> IntStream.rangeClosed(1, stadiumRequestDto.getMaxColumnNum())
-                        .mapToObj(j -> Seat.builder()
-                                .stadium(stadium)
-                                .rowNum(i)
-                                .columnNum(j)
-                                .build()))
-                .forEach(seatRepository::save);
+        stadiumRequestDto.getSeatList().forEach(s ->
+                seatRepository.save(Seat.builder()
+                        .stadium(stadium)
+                        .rowNum(s.getRowNum())
+                        .columnNum(s.getColumnNum())
+                        .grade(s.getGrade())
+                        .build())
+        );
         return new ResponseEntity<>(new Message("공연장 등록 성공", null), HttpStatus.OK);
     }
 }
