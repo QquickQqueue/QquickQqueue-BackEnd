@@ -43,7 +43,7 @@ public class MembersService {
 		if (findEmail.isPresent()) {
 			Members pMember = findEmail.get();
 			if (pMember.getOutDate() != null) {
-				throw new IllegalArgumentException("이미 탈퇴한 이메일입니다. email : " + email);
+				throw new IllegalStateException("이미 탈퇴한 이메일입니다. email : " + email);
 			} else if (pMember.isKakaoEmail()) {
 				 pMember.setPassword(password);
 				 membersRepository.save(pMember);

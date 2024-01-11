@@ -4,6 +4,7 @@ import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.members.dto.request.KakaoMemberInfoDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
+import com.example.qquickqqueue.exception.GlobalExceptionHandler;
 import com.example.qquickqqueue.redis.util.RedisUtil;
 import com.example.qquickqqueue.security.jwt.JwtUtil;
 import com.example.qquickqqueue.security.jwt.TokenDto;
