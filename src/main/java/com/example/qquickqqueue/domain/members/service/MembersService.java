@@ -10,6 +10,7 @@ import com.example.qquickqqueue.redis.util.RedisUtil;
 import com.example.qquickqqueue.security.jwt.JwtUtil;
 import com.example.qquickqqueue.security.jwt.TokenDto;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.InvalidParameterException;
@@ -48,7 +49,7 @@ public class MembersService {
 				 membersRepository.save(pMember);
 				 return new ResponseEntity<>(new Message("카카오 연동 성공", null), HttpStatus.OK);
 			} else {
-				throw new IllegalArgumentException("이미 존재하는 이메일입니다. email : " + email);
+				throw new EntityExistsException("이미 존재하는 이메일입니다. email : " + email);
 			}
 		}
 
@@ -73,11 +74,11 @@ public class MembersService {
 			() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다. email : " + email)
 		);
 		if (member.getOutDate() != null) {
-			throw new IllegalArgumentException("이미 탈퇴한 이메일입니다. email : " + email);
+			throw new IllegalStateException("이미 탈퇴한 이메일입니다. email : " + email);
 		}
 		// 비밀번호 틀렸을 때
 		if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
-			throw new IllegalArgumentException("비밀번호를 틀렸습니다.");
+			throw new InvalidParameterException("비밀번호를 틀렸습니다.");
 		}
 
 		TokenDto tokenDto = jwtUtil.createAllToken(member);
@@ -109,7 +110,7 @@ public class MembersService {
 	@Transactional
 	public ResponseEntity<Message> withdrawal(WithdrawalDto withdrawalDto, Members member) {
 		if (!passwordEncoder.matches(withdrawalDto.getPassword(), member.getPassword())) {
-			throw new IllegalArgumentException("비밀번호를 틀렸습니다.");
+			throw new InvalidParameterException("비밀번호를 틀렸습니다.");
 		} else {
 			member.updateDate();
 			membersRepository.save(member);

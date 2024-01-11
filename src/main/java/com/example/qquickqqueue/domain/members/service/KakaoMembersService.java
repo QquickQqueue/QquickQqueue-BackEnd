@@ -118,7 +118,7 @@ public class KakaoMembersService {
         String phoneNumber = jsonNode.get("kakao_account").get("phone_number").asText();
 
         if (!phoneNumber.startsWith("+82 ")) {
-            throw new RuntimeException("한국 번호로만 가입해줘~~");
+            throw new IllegalStateException("허용되지 않는 국가번호입니다.");
         } else {
             phoneNumber = "0" + phoneNumber.substring(4);
         }
