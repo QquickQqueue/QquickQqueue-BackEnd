@@ -99,6 +99,9 @@ public class JwtUtil {
 	}
 
 	public boolean validateToken(String token) {
+		if (redisUtil.hasKeyBlackList(token)) {
+			return false;
+		}
 		try {
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 			return true;

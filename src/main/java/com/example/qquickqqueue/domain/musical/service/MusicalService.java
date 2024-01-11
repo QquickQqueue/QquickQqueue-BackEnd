@@ -24,6 +24,7 @@ import com.example.qquickqqueue.domain.seatGrade.repository.SeatGradeRepository;
 import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import com.example.qquickqqueue.domain.stadium.repository.StadiumRepository;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -63,7 +64,7 @@ public class MusicalService {
 
     public ResponseEntity<Message> readMusical(Long musicalId) {
         Musical musical = musicalRepository.findById(musicalId).orElseThrow(
-                () -> new IllegalArgumentException("뮤지컬을 찾을 수 없습니다. Invalid Musical Id : " + musicalId)
+                () -> new EntityNotFoundException("뮤지컬을 찾을 수 없습니다. Invalid Musical Id : " + musicalId)
         );
         return new ResponseEntity<>(new Message("조회 성공", MusicalResponseDto.builder()
                 .id(musical.getId())
@@ -147,7 +148,7 @@ public class MusicalService {
             throw new IllegalArgumentException("이미 등록된 뮤지컬이 있는 기간입니다.");
 
         Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(
-                () -> new IllegalArgumentException("등록되지 않은 공연장입니다. Stadium Id : " + stadiumId)
+                () -> new EntityNotFoundException("등록되지 않은 공연장입니다. Stadium Id : " + stadiumId)
         );
 
         Musical musical = musicalRepository.save(Musical.builder()
@@ -180,7 +181,7 @@ public class MusicalService {
 
                     scheduleRequestDto.getActorName().forEach(s -> {
                         Actor actor = actorRepository.findByActorName(s).orElseThrow(
-                                () -> new IllegalArgumentException("등록되지 않은 배우입니다. 배우이름 : " + s)
+                                () -> new EntityNotFoundException("등록되지 않은 배우입니다. 배우이름 : " + s)
                         );
 
                         castingRepository.save(Casting.builder()

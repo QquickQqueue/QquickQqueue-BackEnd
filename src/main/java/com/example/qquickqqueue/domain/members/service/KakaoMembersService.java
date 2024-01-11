@@ -4,6 +4,7 @@ import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.members.dto.request.KakaoMemberInfoDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
+import com.example.qquickqqueue.exception.GlobalExceptionHandler;
 import com.example.qquickqqueue.redis.util.RedisUtil;
 import com.example.qquickqqueue.security.jwt.JwtUtil;
 import com.example.qquickqqueue.security.jwt.TokenDto;
@@ -118,7 +119,7 @@ public class KakaoMembersService {
         String phoneNumber = jsonNode.get("kakao_account").get("phone_number").asText();
 
         if (!phoneNumber.startsWith("+82 ")) {
-            throw new RuntimeException("한국 번호로만 가입해줘~~");
+            throw new IllegalStateException("허용되지 않는 국가번호입니다.");
         } else {
             phoneNumber = "0" + phoneNumber.substring(4);
         }

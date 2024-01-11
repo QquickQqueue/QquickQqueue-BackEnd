@@ -10,8 +10,10 @@ import com.example.qquickqqueue.domain.ticket.dto.TicketResponseDto;
 import com.example.qquickqqueue.domain.ticket.entity.Ticket;
 import com.example.qquickqqueue.domain.ticket.repository.TicketRepository;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -37,7 +39,7 @@ public class TicketService {
         Musical musical = schedule.getMusical();
 
         if (scheduleSeat.isReserved()) {
-            throw new IllegalArgumentException("이미 선택된 좌석입니다.");
+            throw new EntityExistsException("이미 선택된 좌석입니다.");
         } else {
             scheduleSeat.setReserved(true);
             scheduleSeatRepository.save(scheduleSeat);
@@ -75,7 +77,7 @@ public class TicketService {
         if (optionalTicket.isEmpty()) {
             throw new EntityNotFoundException("해당 티켓을 찾을 수 없습니다. ticket-id : " + ticketId);
         } else if (!optionalTicket.get().isStatus()) {
-            throw new IllegalArgumentException("이미 취소된 티켓입니다. ticket-id : " + ticketId);
+            throw new EntityExistsException("이미 취소된 티켓입니다. ticket-id : " + ticketId);
         } else {
             Ticket ticket = optionalTicket.get();
 
