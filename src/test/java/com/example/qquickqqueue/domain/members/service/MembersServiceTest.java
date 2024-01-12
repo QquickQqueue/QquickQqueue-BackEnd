@@ -18,6 +18,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -104,6 +105,8 @@ class MembersServiceTest {
 				.phoneNumber("010-123-1234")
 				.build();
 
+			LocalDateTime localDateTime = LocalDateTime.of(2024, 4, 4, 4, 4,4 ,4);
+
 			Members kakaoMember = Members.builder()
 				.email("kakao@test.com")
 				.password("kakao")
@@ -112,12 +115,15 @@ class MembersServiceTest {
 				.birth(LocalDate.now())
 				.phoneNumber("010-1234-1234")
 				.isKakaoEmail(true)
+				.createAt(localDateTime)
+				.modifiedDate(localDateTime)
 				.build();
 
+
 			String email = requestDto.getEmail();
+			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
 
 			// when
-			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
 			ResponseEntity<Message> response = membersService.signup(requestDto);
 
 			// then
