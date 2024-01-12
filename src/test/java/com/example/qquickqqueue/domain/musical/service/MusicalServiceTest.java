@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.musical.service;
 
 import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.actor.repository.ActorRepository;
 import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
@@ -12,6 +13,7 @@ import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
+import com.example.qquickqqueue.domain.schedule.dto.ScheduleRequestDto;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
@@ -51,6 +53,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
@@ -468,7 +471,7 @@ class MusicalServiceTest {
             ScheduleSeat scheduleSeat = ScheduleSeat.builder().isReserved(false).schedule(schedule)
                     .seat(seatList.get(1)).seatGrade(seatGradeList.get(0)).build();
 
-            when(scheduleSeatRepository.save(any())).thenReturn(seatList);
+            when(scheduleSeatRepository.save(any())).thenReturn(scheduleSeat);
 
             // when
             ResponseEntity<Message> response = musicalService.saveMusical(musicalSaveRequestDto);
