@@ -14,9 +14,11 @@ import com.example.qquickqqueue.redis.util.RedisUtil;
 import com.example.qquickqqueue.security.jwt.JwtUtil;
 import com.example.qquickqqueue.security.jwt.TokenDto;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -103,6 +105,8 @@ class MembersServiceTest {
 				.phoneNumber("010-123-1234")
 				.build();
 
+			LocalDateTime localDateTime = LocalDateTime.of(2024, 4, 4, 4, 4,4 ,4);
+
 			Members kakaoMember = Members.builder()
 				.email("kakao@test.com")
 				.password("kakao")
@@ -111,12 +115,15 @@ class MembersServiceTest {
 				.birth(LocalDate.now())
 				.phoneNumber("010-1234-1234")
 				.isKakaoEmail(true)
+				.createAt(localDateTime)
+				.modifiedDate(localDateTime)
 				.build();
 
+
 			String email = requestDto.getEmail();
+			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
 
 			// when
-			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
 			ResponseEntity<Message> response = membersService.signup(requestDto);
 
 			// then
@@ -140,7 +147,7 @@ class MembersServiceTest {
 			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
 			// then
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+			EntityExistsException exception = assertThrows(EntityExistsException.class,
 				() -> membersService.signup(duplRequestDto));
 			assertEquals("이미 존재하는 이메일입니다. email : " + email, exception.getMessage());
 		}
@@ -171,7 +178,7 @@ class MembersServiceTest {
 			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(withdrawalMember));
 
 			// then
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+			IllegalStateException exception = assertThrows(IllegalStateException.class,
 				() -> membersService.signup(duplRequestDto));
 			assertEquals("이미 탈퇴한 이메일입니다. email : " + email, exception.getMessage());
 		}
@@ -245,7 +252,7 @@ class MembersServiceTest {
 			when(membersRepository.findByEmail(requestDto.getEmail())).thenReturn(
 				Optional.of(withdrawalMember));
 
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+			IllegalStateException exception = assertThrows(IllegalStateException.class,
 				() -> membersService.login(requestDto, httpServletResponse));
 
 			assertEquals("이미 탈퇴한 이메일입니다. email : " + requestDto.getEmail(), exception.getMessage());

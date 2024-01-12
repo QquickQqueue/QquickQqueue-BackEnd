@@ -4,7 +4,6 @@ import com.example.qquickqqueue.domain.enumPackage.Gender;
 import com.example.qquickqqueue.domain.members.dto.request.KakaoMemberInfoDto;
 import com.example.qquickqqueue.domain.members.entity.Members;
 import com.example.qquickqqueue.domain.members.repository.MembersRepository;
-import com.example.qquickqqueue.exception.GlobalExceptionHandler;
 import com.example.qquickqqueue.redis.util.RedisUtil;
 import com.example.qquickqqueue.security.jwt.JwtUtil;
 import com.example.qquickqqueue.security.jwt.TokenDto;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -65,33 +63,24 @@ public class KakaoMembersService {
         return new ResponseEntity<>(new Message("로그인 성공", null), HttpStatus.OK);
     }
 
-    private String getToken(String code) throws JsonProcessingException {
+    public ResponseEntity<Message> kakaoWithdrawal(String accessToken, Members member) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add("Authorization", "Bearer " + accessToken);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code");
-        body.add("client_id", client_id);
-        body.add("client_secret", client_secret);
-        body.add("redirect_uri", redirect_uri);
-        body.add("code", code);
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
-        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
         RestTemplate rt = new RestTemplate();
-        ResponseEntity<String> response = rt.postForEntity(
-                "https://kauth.kakao.com/oauth/token",
-                kakaoTokenRequest,
-                String.class
-        );
+        ResponseEntity<String> responseEntity = rt.exchange(
+            "https://kapi.kakao.com/v1/user/unlink",
+            HttpMethod.POST, requestEntity, String.class);
 
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throw new RestClientException("카카오 서버가 원활하지 않음. Status : " + response.getStatusCode());
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            member.updateDate();
+            membersRepository.save(member);
+            return new ResponseEntity<>(new Message("카카오 탈퇴 성공", null), HttpStatus.OK);
+        } else {
+            throw new HttpClientErrorException(responseEntity.getStatusCode());
         }
-
-        String responseBody = response.getBody();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
-        return jsonNode.get("access_token").asText();
     }
 
     private KakaoMemberInfoDto getKakaoMemeberInfo(String accessToken) throws JsonProcessingException {
@@ -102,10 +91,10 @@ public class KakaoMembersService {
         HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
         RestTemplate rt = new RestTemplate();
         ResponseEntity<String> response = rt.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.GET,
-                kakaoUserInfoRequest,
-                String.class
+            "https://kapi.kakao.com/v2/user/me",
+            HttpMethod.GET,
+            kakaoUserInfoRequest,
+            String.class
         );
 
         if (response.getStatusCode() != HttpStatus.OK) {
@@ -125,15 +114,14 @@ public class KakaoMembersService {
         }
 
         return KakaoMemberInfoDto.builder()
-                .name(jsonNode.get("properties").get("nickname").asText())
-                .email(jsonNode.get("kakao_account").get("email").asText())
-                .gender(Gender.valueOf(jsonNode.get("kakao_account").get("gender").asText().toUpperCase()))
-                .birth(LocalDate.parse(jsonNode.get("kakao_account").get("birthyear").asText() + jsonNode.get("kakao_account").get("birthday").asText(),
-                        DateTimeFormatter.ofPattern("yyyyMMdd")))
-                .phoneNumber(phoneNumber)
-                .build();
+            .name(jsonNode.get("properties").get("nickname").asText())
+            .email(jsonNode.get("kakao_account").get("email").asText())
+            .gender(Gender.valueOf(jsonNode.get("kakao_account").get("gender").asText().toUpperCase()))
+            .birth(LocalDate.parse(jsonNode.get("kakao_account").get("birthyear").asText() + jsonNode.get("kakao_account").get("birthday").asText(),
+                DateTimeFormatter.ofPattern("yyyyMMdd")))
+            .phoneNumber(phoneNumber)
+            .build();
     }
-
     private Members registerKakaoMemberIfNeeded(KakaoMemberInfoDto kakaoMemberInfoDto) {
         Optional<Members> member = membersRepository.findByEmail(kakaoMemberInfoDto.getEmail());
         Members fMember;
@@ -156,27 +144,5 @@ public class KakaoMembersService {
             }
         }
         return fMember;
-    }
-
-    public ResponseEntity<Message> kakaoWithdrawal(String code, HttpServletResponse response, Members member) throws JsonProcessingException {
-        String accessToken = getToken(code);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-
-        RestTemplate rt = new RestTemplate();
-        ResponseEntity<String> responseEntity = rt.exchange(
-            "https://kapi.kakao.com/v1/user/unlink",
-            HttpMethod.POST, requestEntity, String.class);
-
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            member.updateDate();
-            membersRepository.save(member);
-            return new ResponseEntity<>(new Message("카카오 탈퇴 성공", null), HttpStatus.OK);
-        } else {
-            throw new HttpClientErrorException(responseEntity.getStatusCode());
-        }
     }
 }

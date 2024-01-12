@@ -13,6 +13,7 @@ import com.example.qquickqqueue.domain.ticket.dto.TicketResponseDto;
 import com.example.qquickqqueue.domain.ticket.entity.Ticket;
 import com.example.qquickqqueue.domain.ticket.repository.TicketRepository;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -127,7 +128,8 @@ class TicketServiceTest {
             when(scheduleSeatRepository.findById(1L)).thenReturn(Optional.of(scheduleSeat));
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> ticketService.createTicket(requestDto, mockMember));
+            Exception exception = assertThrows(EntityExistsException.class, () -> ticketService.createTicket(requestDto, mockMember));
+            assertEquals("이미 선택된 좌석입니다.", exception.getMessage());
         }
     }
 
@@ -197,7 +199,7 @@ class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(optionalTicket);
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> ticketService.cancelTicket(ticketId));
+            assertThrows(EntityExistsException.class, () -> ticketService.cancelTicket(ticketId));
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.qquickqqueue.domain.musical.service;
 
 import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.actor.entity.Actor;
+import com.example.qquickqqueue.domain.actor.repository.ActorRepository;
 import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.casting.repository.CastingRepository;
 import com.example.qquickqqueue.domain.enumPackage.Gender;
@@ -9,8 +10,10 @@ import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
+import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
+import com.example.qquickqqueue.domain.schedule.dto.ScheduleRequestDto;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
@@ -18,9 +21,14 @@ import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
+import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
+import com.example.qquickqqueue.domain.seatGrade.repository.SeatGradeRepository;
 import com.example.qquickqqueue.domain.stadium.entity.Stadium;
+import com.example.qquickqqueue.domain.stadium.repository.StadiumRepository;
 import com.example.qquickqqueue.util.Message;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,6 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
@@ -44,6 +53,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
@@ -56,8 +66,17 @@ class MusicalServiceTest {
     private ScheduleRepository scheduleRepository;
     @Mock
     private CastingRepository castingRepository;
+    @Mock
+    private StadiumRepository stadiumRepository;
+    @Mock
+    private SeatGradeRepository seatGradeRepository;
+    @Mock
+    private ActorRepository actorRepository;
+    @Mock
+    private SeatRepository seatRepository;
     @InjectMocks
     private MusicalService musicalService;
+
 
     Musical musical = Musical.builder()
             .id(1L)
@@ -177,7 +196,7 @@ class MusicalServiceTest {
             when(musicalRepository.findById(musicalId)).thenReturn(Optional.empty());
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> musicalService.readMusical(musicalId));
+            assertThrows(EntityNotFoundException.class, () -> musicalService.readMusical(musicalId));
         }
     }
 
@@ -361,6 +380,105 @@ class MusicalServiceTest {
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
             assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
+        }
+    }
+
+    @Nested
+    @DisplayName("saveMusical Method Test")
+    class SaveMusical {
+        @Test
+        @DisplayName("saveMusical Method Success Test")
+        void saveMusicalSuccessTest() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 1, 1);
+            LocalDate endDate = LocalDate.of(2024, 1, 24);
+            LocalTime runningTime = LocalTime.of(2, 0, 0);
+            List<ScheduleRequestDto> scheduleRequestDtoList = new ArrayList<>();
+            for (int i = 1; i <= 24; i++) {
+                scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                    .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                    .actorName(List.of("이창섭신동현김지현"))
+                    .build());
+            }
+            MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
+                .title("겨울나그네")
+                .description("이창섭쨩쨩")
+                .thumbnailUrl("thumbnailUrl~")
+                .stadiumId(1L)
+                .startDate(startDate)
+                .endDate(endDate)
+                .runningTime(runningTime)
+                .rating(Rating.P15)
+                .scheduleList(scheduleRequestDtoList)
+                .priceOfVip(150000).priceOfR(130000).priceOfS(110000).priceOfA(90000)
+                .build();
+
+            Long stadiumId = musicalSaveRequestDto.getStadiumId();
+
+            when(musicalRepository.findByStartDateBetweenAndStadium_Id(
+                musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(),
+                stadiumId)).thenReturn(Optional.empty());
+
+            Stadium stadium = Stadium.builder().id(1L).stadiumName("LG베스트샵").address("서울시").build();
+            when(stadiumRepository.findById(stadiumId)).thenReturn(Optional.ofNullable(stadium));
+
+            Musical saveMusical = Musical.builder()
+                .title(musicalSaveRequestDto.getTitle())
+                .description(musicalSaveRequestDto.getDescription())
+                .thumbnailUrl(musicalSaveRequestDto.getThumbnailUrl())
+                .stadium(stadium)
+                .startDate(musicalSaveRequestDto.getStartDate())
+                .endDate(musicalSaveRequestDto.getEndDate())
+                .runningTime(musicalSaveRequestDto.getRunningTime())
+                .rating(musicalSaveRequestDto.getRating())
+                .build();
+
+            when(musicalRepository.save(any())).thenReturn(saveMusical);
+
+            List<SeatGrade> seatGradeList = List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build(),
+                SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build(),
+                SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build(),
+                SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build());
+
+            when(seatGradeRepository.saveAll(any())).thenReturn(seatGradeList);
+
+            Schedule schedule = Schedule.builder().id(1L).startTime(LocalDateTime.of(2024, 1, 9, 15, 0, 0))
+                .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
+                .isDeleted(false)
+                .musical(musical)
+                .build();
+
+            when(scheduleRepository.save(any())).thenReturn(schedule);
+
+            Actor actor = Actor.builder().id(1L).actorName("이창섭신동현김지현").gender(Gender.FEMALE).build();
+
+            when(actorRepository.findByActorName(actor.getActorName())).thenReturn(
+                Optional.ofNullable(actor));
+
+            Casting casting = Casting.builder().musical(musical).actor(actor).schedule(schedule).build();
+
+            when(castingRepository.save(any())).thenReturn(casting);
+
+            List<Seat> seatList = List.of(
+                Seat.builder().id(1L).rowNum(1L).columnNum(1L).grade(Grade.VIP).stadium(stadium).build(),
+                Seat.builder().id(2L).rowNum(1L).columnNum(2L).grade(Grade.S).stadium(stadium).build(),
+                Seat.builder().id(3L).rowNum(1L).columnNum(3L).grade(Grade.R).stadium(stadium).build(),
+                Seat.builder().id(4L).rowNum(1L).columnNum(4L).grade(Grade.A).stadium(stadium).build()
+            );
+
+            when(seatRepository.findAllByStadium(stadium)).thenReturn(seatList);
+
+            ScheduleSeat scheduleSeat = ScheduleSeat.builder().isReserved(false).schedule(schedule)
+                    .seat(seatList.get(1)).seatGrade(seatGradeList.get(0)).build();
+
+            when(scheduleSeatRepository.save(any())).thenReturn(scheduleSeat);
+
+            // when
+            ResponseEntity<Message> response = musicalService.saveMusical(musicalSaveRequestDto);
+
+            // then
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals("뮤지컬 등록 성공", Objects.requireNonNull(response.getBody()).getMessage());
         }
     }
 }

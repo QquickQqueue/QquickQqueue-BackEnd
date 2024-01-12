@@ -1,7 +1,5 @@
 package com.example.qquickqqueue.domain.stadium.service;
 
-import com.example.qquickqqueue.domain.enumPackage.Grade;
-import com.example.qquickqqueue.domain.seat.dto.SeatRequestDto;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.stadium.dto.request.StadiumRequestDto;
