@@ -182,6 +182,43 @@ class MembersServiceTest {
 				() -> membersService.signup(duplRequestDto));
 			assertEquals("이미 탈퇴한 이메일입니다. email : " + email, exception.getMessage());
 		}
+
+		@Test
+		@DisplayName("카카오 및 일반 회원 이미 가입")
+		void signup_alreadyExistKakao() {
+			// given
+			SignupRequestDto requestDto = SignupRequestDto.builder().email("kakao@test.com")
+					.password("test1234")
+					.name("tester")
+					.birth(LocalDate.now())
+					.gender(Gender.FEMALE)
+					.phoneNumber("010-123-1234")
+					.build();
+
+			LocalDateTime localDateTime = LocalDateTime.of(2024, 4, 4, 4, 4,4 ,4);
+
+			Members kakaoMember = Members.builder()
+					.email("kakao@test.com")
+					.password("kakao")
+					.name("kakao")
+					.gender(Gender.FEMALE)
+					.birth(LocalDate.now())
+					.phoneNumber("010-1234-1234")
+					.isKakaoEmail(true)
+					.createAt(localDateTime)
+					.modifiedDate(LocalDateTime.of(2024, 5, 5, 5, 5, 5))
+					.build();
+
+			String email = requestDto.getEmail();
+			when(membersRepository.findByEmail(email)).thenReturn(Optional.of(kakaoMember));
+
+			// when
+			EntityExistsException exception = assertThrows(EntityExistsException.class,
+					() -> membersService.signup(requestDto));
+
+			// then
+			assertEquals("이미 존재하는 이메일입니다. email : " + email, exception.getMessage());
+		}
 	}
 
 	@Nested

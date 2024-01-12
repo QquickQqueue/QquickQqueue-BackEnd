@@ -480,5 +480,146 @@ class MusicalServiceTest {
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("뮤지컬 등록 성공", Objects.requireNonNull(response.getBody()).getMessage());
         }
+
+        @Test
+        @DisplayName("saveMusical Method Failed Test - already registered")
+        void saveMusicalFailWithAlreadyRegistered() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 1, 1);
+            LocalDate endDate = LocalDate.of(2024, 1, 24);
+            LocalTime runningTime = LocalTime.of(2, 0, 0);
+            List<ScheduleRequestDto> scheduleRequestDtoList = new ArrayList<>();
+            for (int i = 1; i <= 24; i++) {
+                scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .actorName(List.of("이창섭신동현김지현"))
+                        .build());
+            }
+            MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
+                    .title("겨울나그네")
+                    .description("이창섭쨩쨩")
+                    .thumbnailUrl("thumbnailUrl~")
+                    .stadiumId(1L)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .runningTime(runningTime)
+                    .rating(Rating.P15)
+                    .scheduleList(scheduleRequestDtoList)
+                    .priceOfVip(150000).priceOfR(130000).priceOfS(110000).priceOfA(90000)
+                    .build();
+
+            when(musicalRepository.findByStartDateBetweenAndStadium_Id(
+                    musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(),
+                    musicalSaveRequestDto.getStadiumId())).thenReturn(Optional.of(musical));
+
+            // when
+            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                    () -> musicalService.saveMusical(musicalSaveRequestDto));
+
+            // then
+            assertEquals("이미 등록된 뮤지컬이 있는 기간입니다.", illegalArgumentException.getMessage());
+        }
+
+        @Test
+        @DisplayName("saveMusical Method Failed Test - stadium not found")
+        void saveMusicalFailWithStadiumNotFound() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 1, 1);
+            LocalDate endDate = LocalDate.of(2024, 1, 24);
+            LocalTime runningTime = LocalTime.of(2, 0, 0);
+            List<ScheduleRequestDto> scheduleRequestDtoList = new ArrayList<>();
+            for (int i = 1; i <= 24; i++) {
+                scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .actorName(List.of("이창섭신동현김지현"))
+                        .build());
+            }
+            MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
+                    .title("겨울나그네")
+                    .description("이창섭쨩쨩")
+                    .thumbnailUrl("thumbnailUrl~")
+                    .stadiumId(1L)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .runningTime(runningTime)
+                    .rating(Rating.P15)
+                    .scheduleList(scheduleRequestDtoList)
+                    .priceOfVip(150000).priceOfR(130000).priceOfS(110000).priceOfA(90000)
+                    .build();
+
+            Long stadiumId = musicalSaveRequestDto.getStadiumId();
+
+            when(musicalRepository.findByStartDateBetweenAndStadium_Id(
+                    musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(),
+                    stadiumId)).thenReturn(Optional.empty());
+
+            when(stadiumRepository.findById(stadiumId)).thenReturn(Optional.empty());
+
+            // when
+            EntityNotFoundException entityNotFoundException = assertThrows(EntityNotFoundException.class,
+                    () -> musicalService.saveMusical(musicalSaveRequestDto));
+
+            // then
+            assertEquals("등록되지 않은 공연장입니다. Stadium Id : 1", entityNotFoundException.getMessage());
+        }
+
+        @Test
+        @DisplayName("saveMusical Method Failed Test - actor not found")
+        void saveMuscialFailWithActorNotFound() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 1, 1);
+            LocalDate endDate = LocalDate.of(2024, 1, 24);
+            LocalTime runningTime = LocalTime.of(2, 0, 0);
+            List<ScheduleRequestDto> scheduleRequestDtoList = new ArrayList<>();
+            for (int i = 1; i <= 24; i++) {
+                scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
+                        .actorName(List.of("이창섭신동현김지현"))
+                        .build());
+            }
+            MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
+                    .title("겨울나그네")
+                    .description("이창섭쨩쨩")
+                    .thumbnailUrl("thumbnailUrl~")
+                    .stadiumId(1L)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .runningTime(runningTime)
+                    .rating(Rating.P15)
+                    .scheduleList(scheduleRequestDtoList)
+                    .priceOfVip(150000).priceOfR(130000).priceOfS(110000).priceOfA(90000)
+                    .build();
+
+            Long stadiumId = musicalSaveRequestDto.getStadiumId();
+            
+            when(musicalRepository.findByStartDateBetweenAndStadium_Id(
+                    musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(),
+                    musicalSaveRequestDto.getStadiumId())).thenReturn(Optional.empty());
+
+            Stadium stadium = Stadium.builder().id(1L).stadiumName("LG베스트샵").address("서울시").build();
+            when(stadiumRepository.findById(stadiumId)).thenReturn(Optional.of(stadium));
+
+            List<SeatGrade> seatGradeList = List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build(),
+                    SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build(),
+                    SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build(),
+                    SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build());
+
+            when(seatGradeRepository.saveAll(any())).thenReturn(seatGradeList);
+
+            Schedule schedule = Schedule.builder().id(1L).startTime(LocalDateTime.of(2024, 1, 9, 15, 0, 0))
+                    .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
+                    .isDeleted(false)
+                    .musical(musical)
+                    .build();
+
+            when(scheduleRepository.save(any())).thenReturn(schedule);
+
+            // when
+            EntityNotFoundException entityNotFoundException = assertThrows(EntityNotFoundException.class,
+                    () -> musicalService.saveMusical(musicalSaveRequestDto));
+
+            // then
+            assertEquals("등록되지 않은 배우입니다. 배우이름 : 이창섭신동현김지현", entityNotFoundException.getMessage());
+        }
     }
 }
