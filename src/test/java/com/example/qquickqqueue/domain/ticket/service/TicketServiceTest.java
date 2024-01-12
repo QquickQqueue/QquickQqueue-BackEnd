@@ -197,7 +197,7 @@ class TicketServiceTest {
             when(ticketRepository.findById(ticketId)).thenReturn(optionalTicket);
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> ticketService.cancelTicket(ticketId));
+            assertThrows(EntityExistsException.class, () -> ticketService.cancelTicket(ticketId));
         }
     }
 
