@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import java.util.UUID;
 import static com.example.qquickqqueue.security.jwt.JwtUtil.ACCESS_KEY;
 import static com.example.qquickqqueue.security.jwt.JwtUtil.REFRESH_KEY;
 
+@Generated
 @Slf4j
 @Service
 @Transactional
