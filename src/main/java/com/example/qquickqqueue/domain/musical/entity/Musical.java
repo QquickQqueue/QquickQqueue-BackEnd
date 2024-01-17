@@ -1,6 +1,5 @@
 package com.example.qquickqqueue.domain.musical.entity;
 
-import com.example.qquickqqueue.domain.casting.entity.Casting;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import jakarta.persistence.*;
@@ -12,8 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -51,7 +48,4 @@ public class Musical {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "STADIUM_ID")
     private Stadium stadium;
-
-    @OneToMany(mappedBy = "musical", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Casting> castings = new ArrayList<>();
 }
