@@ -10,6 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ScheduleSeatResponseDto {
     private Long id;
+    private String name;
     private boolean isReserved;
     private long rowNum;
     private long columnNum;
