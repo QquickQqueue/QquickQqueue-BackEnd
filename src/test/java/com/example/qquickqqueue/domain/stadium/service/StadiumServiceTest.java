@@ -1,7 +1,5 @@
 package com.example.qquickqqueue.domain.stadium.service;
 
-import com.example.qquickqqueue.domain.enumPackage.Grade;
-import com.example.qquickqqueue.domain.seat.dto.SeatRequestDto;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.stadium.dto.request.StadiumRequestDto;
@@ -18,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,17 +41,15 @@ class StadiumServiceTest {
             StadiumRequestDto stadiumRequestDto = StadiumRequestDto.builder()
                     .stadiumName("예술의 전당")
                     .stadiumAddress("")
-                    .seatList(List.of(SeatRequestDto.builder()
-                            .rowNum(2)
-                            .columnNum(3)
-                            .grade(Grade.VIP)
-                            .build()))
+                    .rowNum(20)
+                    .columnNum(20)
                     .build();
             Stadium stadium = Stadium.builder()
                     .id(1L)
                     .stadiumName(stadiumRequestDto.getStadiumName())
                     .address(stadiumRequestDto.getStadiumAddress())
                     .build();
+
             when(stadiumRepository.save(any())).thenReturn(stadium);
             when(seatRepository.save(any())).thenReturn(Seat.builder()
                     .stadium(stadium)
@@ -66,7 +62,7 @@ class StadiumServiceTest {
 
             // then
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertEquals("공연장 등록 성공", response.getBody().getMessage());
+            assertEquals("공연장 등록 성공", Objects.requireNonNull(response.getBody()).getMessage());
         }
     }
 }
