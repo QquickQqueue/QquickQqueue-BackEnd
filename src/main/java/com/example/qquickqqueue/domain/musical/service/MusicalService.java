@@ -140,12 +140,11 @@ public class MusicalService {
     public ResponseEntity<Message> saveMusical(MusicalSaveRequestDto musicalSaveRequestDto) {
         Long stadiumId = musicalSaveRequestDto.getStadiumId();
 
-        Optional<Musical> optionalMusical = musicalRepository.findByStartDateBetweenAndStadium_Id(
-                musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(), stadiumId
-        );
-
-        if (optionalMusical.isPresent())
-            throw new IllegalArgumentException("이미 등록된 뮤지컬이 있는 기간입니다.");
+        musicalRepository.findByStartDateBetweenAndStadium_Id(
+                        musicalSaveRequestDto.getStartDate(), musicalSaveRequestDto.getEndDate(), stadiumId)
+                .ifPresent(existingMusical -> {
+                    throw new IllegalArgumentException("이미 등록된 뮤지컬이 있는 기간입니다.");
+                });
 
         Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(
                 () -> new EntityNotFoundException("등록되지 않은 공연장입니다. Stadium Id : " + stadiumId)
@@ -162,57 +161,56 @@ public class MusicalService {
                 .rating(musicalSaveRequestDto.getRating())
                 .build());
 
-        List<SeatGrade> seatGradeList = seatGradeRepository.saveAll(
-                List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build()
-                        , SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build()
-                        , SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build()
-                        , SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build())
-        );
+        List<Schedule> scheduleList = scheduleRepository.saveAll(musicalSaveRequestDto.getScheduleList().stream()
+                .map(scheduleRequestDto -> Schedule.builder()
+                        .startTime(scheduleRequestDto.getStartTime())
+                        .endTime(scheduleRequestDto.getEndTime())
+                        .musical(musical)
+                        .build()).toList());
 
-        List<Schedule> scheduleList = new ArrayList<>();
+        List<String> allActorNames = musicalSaveRequestDto.getScheduleList().stream()
+                .flatMap(scheduleRequestDto -> scheduleRequestDto.getActorName().stream())
+                .distinct().toList();
 
-        musicalSaveRequestDto.getScheduleList().forEach(scheduleRequestDto -> {
-                    Schedule schedule = scheduleRepository.save(Schedule.builder()
-                            .startTime(scheduleRequestDto.getStartTime())
-                            .endTime(scheduleRequestDto.getEndTime())
+        List<Actor> allActors = actorRepository.findByActorNameIn(allActorNames);
+
+        if (allActors.size() != allActorNames.size()) {
+            throw new EntityNotFoundException("등록되지 않은 배우가 있습니다.");
+        }
+
+        Map<String, Actor> actorMap = allActors.stream()
+                .collect(Collectors.toMap(Actor::getActorName, Function.identity()));
+
+        List<Casting> castingList = new ArrayList<>();
+        IntStream.range(0, scheduleList.size())
+                .forEach(i -> {
+                    Schedule schedule = scheduleList.get(i);
+                    List<String> actorNames = musicalSaveRequestDto.getScheduleList().get(i).getActorName();
+                    actorNames.forEach(actorName -> castingList.add(Casting.builder()
+                            .schedule(schedule)
+                            .actor(actorMap.get(actorName))
                             .musical(musical)
-                            .build());
-                    scheduleList.add(schedule);
+                            .build()));
+                });
+        castingRepository.saveAll(castingList);
 
-                    scheduleRequestDto.getActorName().forEach(s -> {
-                        Actor actor = actorRepository.findByActorName(s).orElseThrow(
-                                () -> new EntityNotFoundException("등록되지 않은 배우입니다. 배우이름 : " + s)
-                        );
-
-                        castingRepository.save(Casting.builder()
-                                .schedule(schedule)
-                                .actor(actor)
-                                .musical(musical)
-                                .build());
-                    });
-                }
-        );
+        Map<Grade, SeatGrade> seatGradeMap = new EnumMap<>(Grade.class);
+        seatGradeMap.put(Grade.VIP, seatGradeRepository.save(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build()));
+        seatGradeMap.put(Grade.R, seatGradeRepository.save(SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfVip()).build()));
+        seatGradeMap.put(Grade.S, seatGradeRepository.save(SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfVip()).build()));
+        seatGradeMap.put(Grade.A, seatGradeRepository.save(SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfVip()).build()));
 
         List<Seat> seatList = seatRepository.findAllByStadium(stadium);
 
-        scheduleList.forEach(s ->
-                seatList.forEach(seat -> {
-                            SeatGrade seatGrade;
-                            switch (seat.getGrade()) {
-                                case VIP -> seatGrade = seatGradeList.get(0);
-                                case R -> seatGrade = seatGradeList.get(1);
-                                case S -> seatGrade = seatGradeList.get(2);
-                                default -> seatGrade = seatGradeList.get(3);
-                            }
-                            scheduleSeatRepository.save(ScheduleSeat.builder()
-                                    .isReserved(false)
-                                    .schedule(s)
-                                    .seat(seat)
-                                    .seatGrade(seatGrade)
-                                    .build());
-                        }
-                )
-        );
+        scheduleSeatRepository.saveAll(scheduleList.stream()
+                .flatMap(s -> seatList.stream()
+                        .map(seat -> ScheduleSeat.builder()
+                                .isReserved(false)
+                                .schedule(s)
+                                .seat(seat)
+                                .seatGrade(seatGradeMap.get(seat.getGrade()))
+                                .build())).toList());
+
         return new ResponseEntity<>(new Message("뮤지컬 등록 성공", null), HttpStatus.OK);
     }
 }
