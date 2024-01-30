@@ -46,7 +46,6 @@ import java.util.stream.IntStream;
 public class MusicalService {
     private final MusicalRepository musicalRepository;
     private final ScheduleRepository scheduleRepository;
-    private final ScheduleSeatRepository scheduleSeatRepository;
     private final CastingRepository castingRepository;
     private final SeatGradeRepository seatGradeRepository;
     private final StadiumRepository stadiumRepository;
