@@ -17,7 +17,7 @@ import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
-import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
+import com.example.qquickqqueue.domain.scheduleSeat.repository.impl.ScheduleSeatCustomRepositoryImpl;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
@@ -46,13 +46,13 @@ import java.util.stream.IntStream;
 public class MusicalService {
     private final MusicalRepository musicalRepository;
     private final ScheduleRepository scheduleRepository;
-    private final ScheduleSeatRepository scheduleSeatRepository;
     private final CastingRepository castingRepository;
     private final SeatGradeRepository seatGradeRepository;
     private final StadiumRepository stadiumRepository;
     private final SeatRepository seatRepository;
     private final ActorRepository actorRepository;
     private final MusicalJdbcRepository musicalJdbcRepository;
+    private final ScheduleSeatCustomRepositoryImpl scheduleSeatCustomRepository;
 
     public ResponseEntity<Message> readMusicals(Pageable pageable) {
         return new ResponseEntity<>(new Message("조회 성공", musicalRepository.findAll(pageable)
@@ -94,7 +94,7 @@ public class MusicalService {
     }
 
     public ResponseEntity<Message> readMusicalRoundInfoByDate(Long scheduleId) {
-        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false);
+        List<ScheduleSeat> scheduleSeats = scheduleSeatCustomRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false);
         int vip = 0, r = 0, s = 0, a = 0;
         for (ScheduleSeat seat : scheduleSeats) {
             switch (seat.getSeatGrade().getGrade()) {
@@ -116,7 +116,7 @@ public class MusicalService {
     }
 
     public ResponseEntity<Message> readMusicalSeatInfo(Long scheduleId) {
-        return new ResponseEntity<>(new Message("조회 성공", scheduleSeatRepository.findAllBySchedule_Id(scheduleId)
+        return new ResponseEntity<>(new Message("조회 성공", scheduleSeatCustomRepository.findAllBySchedule_Id(scheduleId)
                 .stream()
                 .map(scheduleSeat -> ScheduleSeatResponseDto.builder()
                         .id(scheduleSeat.getId())

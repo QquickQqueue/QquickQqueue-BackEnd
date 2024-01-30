@@ -7,6 +7,7 @@ import com.example.qquickqqueue.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class TicketController {
     }
 
     @GetMapping
-    public ResponseEntity<Message> readTickets(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+    public ResponseEntity<Message> readTickets(@PageableDefault(page = 0, size = 5, sort = "id", direction = Direction.DESC) Pageable pageable,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ticketService.readTickets(pageable, userDetails.getMember());
     }
