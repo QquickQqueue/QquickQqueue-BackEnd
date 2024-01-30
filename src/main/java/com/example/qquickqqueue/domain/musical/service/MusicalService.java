@@ -10,6 +10,7 @@ import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
+import com.example.qquickqqueue.domain.musical.repository.MusicalJdbcRepository;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
@@ -51,6 +52,7 @@ public class MusicalService {
     private final StadiumRepository stadiumRepository;
     private final SeatRepository seatRepository;
     private final ActorRepository actorRepository;
+    private final MusicalJdbcRepository musicalJdbcRepository;
 
     public ResponseEntity<Message> readMusicals(Pageable pageable) {
         return new ResponseEntity<>(new Message("조회 성공", musicalRepository.findAll(pageable)
@@ -206,7 +208,7 @@ public class MusicalService {
 
         List<Seat> seatList = seatRepository.findAllByStadium(stadium);
 
-        scheduleSeatRepository.saveAll(scheduleList.stream()
+        musicalJdbcRepository.insertScheduleSeatList(scheduleList.stream()
                 .flatMap(s -> seatList.stream()
                         .map(seat -> ScheduleSeat.builder()
                                 .isReserved(false)
