@@ -14,5 +14,5 @@ public interface ScheduleSeatRepository extends JpaRepository<ScheduleSeat, Long
 
     @Override
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    Optional<ScheduleSeat> findById(Long aLong);
+    Optional<ScheduleSeat> findById(Long id);
 }

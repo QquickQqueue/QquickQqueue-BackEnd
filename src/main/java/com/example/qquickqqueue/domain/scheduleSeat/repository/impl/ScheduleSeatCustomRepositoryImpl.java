@@ -5,6 +5,8 @@ import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
 import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatCustomRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -33,5 +35,12 @@ public class ScheduleSeatCustomRepositoryImpl implements ScheduleSeatCustomRepos
 			.join(qScheduleSeat.seat).fetchJoin()
 			.where(qScheduleSeat.schedule.id.eq(scheduleId))
 			.fetch();
+	}
+
+	@Override
+	public Optional<ScheduleSeat> findById(Long id) {
+		return Optional.ofNullable(query.selectFrom(qScheduleSeat)
+				.where(qScheduleSeat.id.eq(id))
+				.fetchOne());
 	}
 }
