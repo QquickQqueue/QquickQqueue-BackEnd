@@ -2,6 +2,8 @@ package com.example.qquickqqueue.security.config;
 
 import com.example.qquickqqueue.security.jwt.JwtAuthFilter;
 import java.util.List;
+
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+@Generated
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -46,7 +49,7 @@ public class WebSecurityConfig{
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 				.requestMatchers(
-					"/api/signup", "/api/login", "/api/musicals", "/api/musicals/**", "/api/kakao"
+					"/api/signup", "/api/login", "/api/musicals", "/api/musicals/**", "/api/kakao", "/"
 				)
 				.permitAll()
 			)
