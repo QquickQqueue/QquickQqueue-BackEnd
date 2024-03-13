@@ -1,5 +1,12 @@
 package com.example.qquickqqueue.domain.musical.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.actor.entity.Actor;
 import com.example.qquickqqueue.domain.actor.repository.ActorRepository;
@@ -12,6 +19,7 @@ import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
+import com.example.qquickqqueue.domain.musical.repository.MusicalJdbcRepository;
 import com.example.qquickqqueue.domain.musical.repository.MusicalRepository;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleRequestDto;
 import com.example.qquickqqueue.domain.schedule.dto.ScheduleResponseDto;
@@ -19,7 +27,7 @@ import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.schedule.repository.ScheduleRepository;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
-import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
+import com.example.qquickqqueue.domain.scheduleSeat.repository.impl.ScheduleSeatCustomRepositoryImpl;
 import com.example.qquickqqueue.domain.seat.entity.Seat;
 import com.example.qquickqqueue.domain.seat.repository.SeatRepository;
 import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
@@ -28,7 +36,13 @@ import com.example.qquickqqueue.domain.stadium.entity.Stadium;
 import com.example.qquickqqueue.domain.stadium.repository.StadiumRepository;
 import com.example.qquickqqueue.util.Message;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,24 +58,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @ExtendWith({MockitoExtension.class})
 class MusicalServiceTest {
     @Mock
     private MusicalRepository musicalRepository;
-    @Mock
-    private ScheduleSeatRepository scheduleSeatRepository;
     @Mock
     private ScheduleRepository scheduleRepository;
     @Mock
@@ -76,6 +76,11 @@ class MusicalServiceTest {
     private SeatRepository seatRepository;
     @InjectMocks
     private MusicalService musicalService;
+
+    @Mock
+    private ScheduleSeatCustomRepositoryImpl scheduleSeatCustomRepositoryImpl;
+    @Mock
+    private MusicalJdbcRepository musicalJdbcRepository;
 
 
     Musical musical = Musical.builder()
@@ -255,7 +260,7 @@ class MusicalServiceTest {
 
             Long scheduleId = 1L;
 
-            when(scheduleSeatRepository.findAllBySchedule_IdAndIsReserved(scheduleId, false)).thenReturn(scheduleSeats);
+            when(scheduleSeatCustomRepositoryImpl.findAllBySchedule_IdAndIsReserved(scheduleId, false)).thenReturn(scheduleSeats);
             when(castingRepository.findAllBySchedule_Id(scheduleId)).thenReturn(castings);
 
             // when
@@ -323,7 +328,7 @@ class MusicalServiceTest {
 
             Long scheduleId = 1L;
 
-            when(scheduleSeatRepository.findAllBySchedule_Id(scheduleId)).thenReturn(scheduleSeats);
+            when(scheduleSeatCustomRepositoryImpl.findAllBySchedule_Id(scheduleId)).thenReturn(scheduleSeats);
 
             // when
             ResponseEntity<Message> response = musicalService.readMusicalSeatInfo(scheduleId);
@@ -397,7 +402,7 @@ class MusicalServiceTest {
             for (int i = 1; i <= 24; i++) {
                 scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
                     .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
-                    .actorName(List.of("이창섭신동현김지현"))
+                    .actorName(List.of("이창섭", "신동현", "김지현", "김은양"))
                     .build());
             }
             MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
@@ -435,43 +440,39 @@ class MusicalServiceTest {
 
             when(musicalRepository.save(any())).thenReturn(saveMusical);
 
-            List<SeatGrade> seatGradeList = List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build(),
-                SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build(),
-                SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build(),
-                SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build());
-
-            when(seatGradeRepository.saveAll(any())).thenReturn(seatGradeList);
-
             Schedule schedule = Schedule.builder().id(1L).startTime(LocalDateTime.of(2024, 1, 9, 15, 0, 0))
                 .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
                 .isDeleted(false)
                 .musical(musical)
                 .build();
 
-            when(scheduleRepository.save(any())).thenReturn(schedule);
+            when(scheduleRepository.saveAll(any())).thenReturn(List.of(schedule));
 
-            Actor actor = Actor.builder().id(1L).actorName("이창섭신동현김지현").gender(Gender.FEMALE).build();
+            when(actorRepository.findByActorNameIn(any()))
+                .thenReturn(List.of(Actor.builder().actorName("이창섭").build(),
+                    Actor.builder().actorName("김은양").build(),
+                    Actor.builder().actorName("신동현").build(),
+                    Actor.builder().actorName("김지현").build()));
 
-            when(actorRepository.findByActorName(actor.getActorName())).thenReturn(
-                Optional.ofNullable(actor));
+            Casting casting1 = Casting.builder().musical(musical).actor(Actor.builder().actorName("이창섭").build()).schedule(schedule).build();
+            Casting casting2 = Casting.builder().musical(musical).actor(Actor.builder().actorName("김은양").build()).schedule(schedule).build();
+            Casting casting3 = Casting.builder().musical(musical).actor(Actor.builder().actorName("신동현").build()).schedule(schedule).build();
+            Casting casting4 = Casting.builder().musical(musical).actor(Actor.builder().actorName("김지현").build()).schedule(schedule).build();
 
-            Casting casting = Casting.builder().musical(musical).actor(actor).schedule(schedule).build();
+            when(castingRepository.saveAll(any())).thenReturn(List.of(casting1, casting2, casting3, casting4));
 
-            when(castingRepository.save(any())).thenReturn(casting);
+            when(seatGradeRepository.save(any(SeatGrade.class))).thenAnswer(invocationOnMock -> {
+                    SeatGrade argument = invocationOnMock.getArgument(0);
+                    return SeatGrade.builder().grade(argument.getGrade()).price(argument.getPrice()).build();
+            });
 
             List<Seat> seatList = List.of(
                 Seat.builder().id(1L).rowNum(1L).columnNum(1L).grade(Grade.VIP).stadium(stadium).build(),
                 Seat.builder().id(2L).rowNum(1L).columnNum(2L).grade(Grade.S).stadium(stadium).build(),
                 Seat.builder().id(3L).rowNum(1L).columnNum(3L).grade(Grade.R).stadium(stadium).build(),
-                Seat.builder().id(4L).rowNum(1L).columnNum(4L).grade(Grade.A).stadium(stadium).build()
-            );
+                Seat.builder().id(4L).rowNum(1L).columnNum(4L).grade(Grade.A).stadium(stadium).build());
 
             when(seatRepository.findAllByStadium(stadium)).thenReturn(seatList);
-
-            ScheduleSeat scheduleSeat = ScheduleSeat.builder().isReserved(false).schedule(schedule)
-                    .seat(seatList.get(1)).seatGrade(seatGradeList.get(0)).build();
-
-            when(scheduleSeatRepository.save(any())).thenReturn(scheduleSeat);
 
             // when
             ResponseEntity<Message> response = musicalService.saveMusical(musicalSaveRequestDto);
@@ -479,6 +480,7 @@ class MusicalServiceTest {
             // then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("뮤지컬 등록 성공", Objects.requireNonNull(response.getBody()).getMessage());
+            verify(musicalJdbcRepository, times(1)).insertScheduleSeatList(any());
         }
 
         @Test
@@ -565,7 +567,7 @@ class MusicalServiceTest {
 
         @Test
         @DisplayName("saveMusical Method Failed Test - actor not found")
-        void saveMuscialFailWithActorNotFound() {
+        void saveMusicalFailWithActorNotFound() {
             // given
             LocalDate startDate = LocalDate.of(2024, 1, 1);
             LocalDate endDate = LocalDate.of(2024, 1, 24);
@@ -574,7 +576,7 @@ class MusicalServiceTest {
             for (int i = 1; i <= 24; i++) {
                 scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
                         .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
-                        .actorName(List.of("이창섭신동현김지현"))
+                        .actorName(List.of("이창섭", "신동현", "김지현", "김은양"))
                         .build());
             }
             MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
@@ -599,27 +601,22 @@ class MusicalServiceTest {
             Stadium stadium = Stadium.builder().id(1L).stadiumName("LG베스트샵").address("서울시").build();
             when(stadiumRepository.findById(stadiumId)).thenReturn(Optional.of(stadium));
 
-            List<SeatGrade> seatGradeList = List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build(),
-                    SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build(),
-                    SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build(),
-                    SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build());
-
-            when(seatGradeRepository.saveAll(any())).thenReturn(seatGradeList);
-
             Schedule schedule = Schedule.builder().id(1L).startTime(LocalDateTime.of(2024, 1, 9, 15, 0, 0))
-                    .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
-                    .isDeleted(false)
-                    .musical(musical)
-                    .build();
+                .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
+                .isDeleted(false)
+                .musical(musical)
+                .build();
+            when(scheduleRepository.saveAll(any())).thenReturn(List.of(schedule));
 
-            when(scheduleRepository.save(any())).thenReturn(schedule);
+            when(actorRepository.findByActorNameIn(any()))
+                .thenReturn(List.of(Actor.builder().actorName("이창섭").build(), Actor.builder().actorName("김은양").build()));
 
             // when
             EntityNotFoundException entityNotFoundException = assertThrows(EntityNotFoundException.class,
                     () -> musicalService.saveMusical(musicalSaveRequestDto));
 
             // then
-            assertEquals("등록되지 않은 배우입니다. 배우이름 : 이창섭신동현김지현", entityNotFoundException.getMessage());
+            assertEquals("등록되지 않은 배우가 있습니다.", entityNotFoundException.getMessage());
         }
     }
 }

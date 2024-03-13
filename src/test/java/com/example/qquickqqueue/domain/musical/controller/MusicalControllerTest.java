@@ -1,14 +1,22 @@
 package com.example.qquickqqueue.domain.musical.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import com.example.qquickqqueue.domain.actor.dto.ActorResponseDto;
 import com.example.qquickqqueue.domain.enumPackage.Grade;
 import com.example.qquickqqueue.domain.enumPackage.Rating;
 import com.example.qquickqqueue.domain.musical.dto.MusicalResponseDto;
 import com.example.qquickqqueue.domain.musical.dto.MusicalRoundInfoResponseDto;
+import com.example.qquickqqueue.domain.musical.dto.MusicalSaveRequestDto;
 import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.musical.service.MusicalService;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.util.Message;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,14 +31,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class MusicalControllerTest {
@@ -174,7 +174,6 @@ class MusicalControllerTest {
             // then
             assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
             assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
-
         }
     }
 
@@ -209,6 +208,25 @@ class MusicalControllerTest {
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals(musicalResponseDtoPage.getTotalPages(), responseValue.getTotalPages());
             assertEquals(musicalResponseDtoPage.getContent().get(1).getTitle(), responseValue.getContent().get(1).getTitle());
+        }
+    }
+
+    @Nested
+    @DisplayName("saveMusical Method Test")
+    class SaveMusical {
+        @Test
+        void saveMusicalTest() {
+            // given
+            MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder().build();
+            ResponseEntity<Message> responseEntity = new ResponseEntity<>(new Message("뮤지컬 등록 성공", null),
+                HttpStatus.OK);
+            when(musicalService.saveMusical(musicalSaveRequestDto)).thenReturn(responseEntity);
+
+            // when
+            ResponseEntity<Message> response = musicalController.saveMusical(musicalSaveRequestDto);
+
+            // then
+            assertEquals(responseEntity, response);
         }
     }
 }
