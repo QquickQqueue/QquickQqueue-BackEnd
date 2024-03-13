@@ -4,7 +4,7 @@ import com.example.qquickqqueue.domain.musical.entity.Musical;
 import com.example.qquickqqueue.domain.schedule.entity.Schedule;
 import com.example.qquickqqueue.domain.scheduleSeat.dto.ScheduleSeatResponseDto;
 import com.example.qquickqqueue.domain.scheduleSeat.entity.ScheduleSeat;
-import com.example.qquickqqueue.domain.scheduleSeat.repository.ScheduleSeatRepository;
+import com.example.qquickqqueue.domain.scheduleSeat.repository.impl.ScheduleSeatCustomRepositoryImpl;
 import com.example.qquickqqueue.domain.seatGrade.entity.SeatGrade;
 import com.example.qquickqqueue.util.Message;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,15 +17,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class ScheduleSeatServiceTest {
     @Mock
-    private ScheduleSeatRepository scheduleSeatRepository;
+    private ScheduleSeatCustomRepositoryImpl scheduleSeatCustomRepositoryImpl;
     @InjectMocks
     private ScheduleSeatService scheduleSeatService;
 
@@ -50,11 +52,12 @@ class ScheduleSeatServiceTest {
                     .seatGrade(seatGrade)
                     .build();
             Long scheduleSeatId = 1L;
-            when(scheduleSeatRepository.findById(scheduleSeatId)).thenReturn(Optional.of(scheduleSeat));
+            when(scheduleSeatCustomRepositoryImpl.findById(scheduleSeatId)).thenReturn(Optional.of(scheduleSeat));
 
             // when
             ResponseEntity<Message> response = scheduleSeatService.readScheduleSeat(scheduleSeatId);
-            ScheduleSeatResponseDto scheduleSeatResponseDto = (ScheduleSeatResponseDto) response.getBody().getData();
+            ScheduleSeatResponseDto scheduleSeatResponseDto = (ScheduleSeatResponseDto) Objects.requireNonNull(response.getBody()).getData();
+
             // then
             assertEquals("조회 성공", response.getBody().getMessage());
             assertEquals("뮤지컬", scheduleSeatResponseDto.getName());
@@ -62,11 +65,11 @@ class ScheduleSeatServiceTest {
         }
 
         @Test
-        @DisplayName("readScheduleSeat Method fail Test")
+        @DisplayName("readScheduleSeat Method Fail Test")
         void readScheduleSeatFail() {
             // given
             Long scheduleSeatId = 1L;
-            when(scheduleSeatRepository.findById(scheduleSeatId)).thenReturn(Optional.empty());
+            when(scheduleSeatCustomRepositoryImpl.findById(scheduleSeatId)).thenReturn(Optional.empty());
 
             // when
             EntityNotFoundException response = assertThrows(EntityNotFoundException.class,
