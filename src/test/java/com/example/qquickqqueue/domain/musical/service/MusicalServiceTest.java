@@ -404,7 +404,7 @@ class MusicalServiceTest {
             for (int i = 1; i <= 24; i++) {
                 scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
                     .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
-                    .actorName(List.of("이창섭신동현김지현"))
+                    .actorName(List.of("이창섭", "신동현", "김지현", "김은양"))
                     .build());
             }
             MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
@@ -442,25 +442,24 @@ class MusicalServiceTest {
 
             when(musicalRepository.save(any())).thenReturn(saveMusical);
 
-            List<SeatGrade> seatGradeList = List.of(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build(),
-                SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build(),
-                SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build(),
-                SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build());
-
-            when(seatGradeRepository.saveAll(any())).thenReturn(seatGradeList);
-
             Schedule schedule = Schedule.builder().id(1L).startTime(LocalDateTime.of(2024, 1, 9, 15, 0, 0))
                 .endTime(LocalDateTime.of(2024, 1, 24, 15, 0, 0))
                 .isDeleted(false)
                 .musical(musical)
                 .build();
 
-            when(scheduleRepository.save(any())).thenReturn(schedule);
+            when(scheduleRepository.saveAll(any())).thenReturn(List.of(schedule));
 
-            Actor actor = Actor.builder().id(1L).actorName("이창섭신동현김지현").gender(Gender.FEMALE).build();
+            when(actorRepository.findByActorNameIn(any()))
+                .thenReturn(List.of(Actor.builder().actorName("이창섭").build(),
+                    Actor.builder().actorName("김은양").build(),
+                    Actor.builder().actorName("신동현").build(),
+                    Actor.builder().actorName("김지현").build()));
 
-            when(actorRepository.findByActorName(actor.getActorName())).thenReturn(
-                Optional.ofNullable(actor));
+            Casting casting1 = Casting.builder().musical(musical).actor(Actor.builder().actorName("이창섭").build()).schedule(schedule).build();
+            Casting casting2 = Casting.builder().musical(musical).actor(Actor.builder().actorName("김은양").build()).schedule(schedule).build();
+            Casting casting3 = Casting.builder().musical(musical).actor(Actor.builder().actorName("신동현").build()).schedule(schedule).build();
+            Casting casting4 = Casting.builder().musical(musical).actor(Actor.builder().actorName("김지현").build()).schedule(schedule).build();
 
             when(castingRepository.saveAll(any())).thenReturn(List.of(casting1, casting2, casting3, casting4));
 
@@ -473,15 +472,9 @@ class MusicalServiceTest {
                 Seat.builder().id(1L).rowNum(1L).columnNum(1L).grade(Grade.VIP).stadium(stadium).build(),
                 Seat.builder().id(2L).rowNum(1L).columnNum(2L).grade(Grade.S).stadium(stadium).build(),
                 Seat.builder().id(3L).rowNum(1L).columnNum(3L).grade(Grade.R).stadium(stadium).build(),
-                Seat.builder().id(4L).rowNum(1L).columnNum(4L).grade(Grade.A).stadium(stadium).build()
-            );
+                Seat.builder().id(4L).rowNum(1L).columnNum(4L).grade(Grade.A).stadium(stadium).build());
 
             when(seatRepository.findAllByStadium(stadium)).thenReturn(seatList);
-
-            ScheduleSeat scheduleSeat = ScheduleSeat.builder().isReserved(false).schedule(schedule)
-                    .seat(seatList.get(1)).seatGrade(seatGradeList.get(0)).build();
-
-            when(scheduleSeatRepository.save(any())).thenReturn(scheduleSeat);
 
             // when
             ResponseEntity<Message> response = musicalService.saveMusical(musicalSaveRequestDto);
@@ -489,6 +482,7 @@ class MusicalServiceTest {
             // then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("뮤지컬 등록 성공", Objects.requireNonNull(response.getBody()).getMessage());
+            verify(musicalJdbcRepository, times(1)).insertScheduleSeatList(any());
         }
 
         @Test
@@ -584,7 +578,7 @@ class MusicalServiceTest {
             for (int i = 1; i <= 24; i++) {
                 scheduleRequestDtoList.add(ScheduleRequestDto.builder().startTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
                         .endTime(LocalDateTime.of(2024, 1, i, 15, 0, 0))
-                        .actorName(List.of("이창섭신동현김지현"))
+                        .actorName(List.of("이창섭", "신동현", "김지현", "김은양"))
                         .build());
             }
             MusicalSaveRequestDto musicalSaveRequestDto = MusicalSaveRequestDto.builder()
@@ -624,7 +618,7 @@ class MusicalServiceTest {
                     () -> musicalService.saveMusical(musicalSaveRequestDto));
 
             // then
-            assertEquals("등록되지 않은 배우입니다. 배우이름 : 이창섭신동현김지현", entityNotFoundException.getMessage());
+            assertEquals("등록되지 않은 배우가 있습니다.", entityNotFoundException.getMessage());
         }
     }
 }
