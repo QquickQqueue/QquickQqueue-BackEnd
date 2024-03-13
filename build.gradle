@@ -63,3 +63,11 @@ tasks.named('bootBuildImage') {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: '**/Q*.class') // QueryDSL의 QEntity 클래스들을 제외
+        }))
+    }
+}
