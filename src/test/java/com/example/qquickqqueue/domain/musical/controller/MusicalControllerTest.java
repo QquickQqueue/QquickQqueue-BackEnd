@@ -174,7 +174,6 @@ class MusicalControllerTest {
             // then
             assertEquals(responseEntity.getBody().getMessage(), response.getBody().getMessage());
             assertEquals(responseEntity.getBody().getData(), response.getBody().getData());
-
         }
     }
 

@@ -63,8 +63,6 @@ class MusicalServiceTest {
     @Mock
     private MusicalRepository musicalRepository;
     @Mock
-    private ScheduleSeatRepository scheduleSeatRepository;
-    @Mock
     private ScheduleRepository scheduleRepository;
     @Mock
     private CastingRepository castingRepository;
@@ -569,7 +567,7 @@ class MusicalServiceTest {
 
         @Test
         @DisplayName("saveMusical Method Failed Test - actor not found")
-        void saveMuscialFailWithActorNotFound() {
+        void saveMusicalFailWithActorNotFound() {
             // given
             LocalDate startDate = LocalDate.of(2024, 1, 1);
             LocalDate endDate = LocalDate.of(2024, 1, 24);
