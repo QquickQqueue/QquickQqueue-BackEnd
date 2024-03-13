@@ -202,9 +202,9 @@ public class MusicalService {
 
         Map<Grade, SeatGrade> seatGradeMap = new EnumMap<>(Grade.class);
         seatGradeMap.put(Grade.VIP, seatGradeRepository.save(SeatGrade.builder().grade(Grade.VIP).price(musicalSaveRequestDto.getPriceOfVip()).build()));
-        seatGradeMap.put(Grade.R, seatGradeRepository.save(SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfVip()).build()));
-        seatGradeMap.put(Grade.S, seatGradeRepository.save(SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfVip()).build()));
-        seatGradeMap.put(Grade.A, seatGradeRepository.save(SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfVip()).build()));
+        seatGradeMap.put(Grade.R, seatGradeRepository.save(SeatGrade.builder().grade(Grade.R).price(musicalSaveRequestDto.getPriceOfR()).build()));
+        seatGradeMap.put(Grade.S, seatGradeRepository.save(SeatGrade.builder().grade(Grade.S).price(musicalSaveRequestDto.getPriceOfS()).build()));
+        seatGradeMap.put(Grade.A, seatGradeRepository.save(SeatGrade.builder().grade(Grade.A).price(musicalSaveRequestDto.getPriceOfA()).build()));
 
         List<Seat> seatList = seatRepository.findAllByStadium(stadium);
 
