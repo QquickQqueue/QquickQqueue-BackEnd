@@ -15,6 +15,14 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+        
+      - name: Set YML
+        run: |
+          echo "${{secrets.APPLICATION_QQ_SECRET}}" | base64 --decode > src/main/resources/application.yml
+          find src
+      
+      - name: Build with Gradle
+        run: ./gradlew clean bootJAR
 
       - name: Extract tag from commit message
         id: extract_tag
