@@ -51,22 +51,6 @@ public class JwtUtilTest {
 	@InjectMocks
 	JwtUtil jwtUtil;
 
-	private static final String BEARER_PREFIX = "Bearer ";
-	public static final String ACCESS_KEY = "ACCESS_KEY";
-	public static final String REFRESH_KEY = "REFRESH_KEY";
-	private static final long ACCESS_TIME = Duration.ofMinutes(30).toMillis();
-	private static final long REFRESH_TIME = Duration.ofDays(7).toMillis();
-
-	Members member = Members.builder()
-	.email("test@test.com")
-	.password("test1234")
-	.name("tester")
-	.gender(Gender.FEMALE)
-	.birth(LocalDate.now())
-	.phoneNumber("010-123-1234")
-	.outDate(LocalDate.now())
-	.build();
-
 	@Nested
 	@DisplayName("resolveToken Method 테스트")
 	class ResolveToken {
