@@ -18,6 +18,7 @@ jobs:
         
       - name: Set YML
         run: |
+          mkdir -p src/main/resources
           echo "${{secrets.APPLICATION_QQ_SECRET}}" | base64 --decode > src/main/resources/application.yml
           find src
       
