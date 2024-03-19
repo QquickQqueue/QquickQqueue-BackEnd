@@ -55,3 +55,27 @@ jobs:
           context: .
           push: true
           tags: sindonghyun/qq:${{ env.TAG }}
+
+  push:
+    name: Push Manifest
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.build.outputs.TAG }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Change manifest
+        run: sed -i "s|sindonghyun/qq:[^ ]*|sindonghyun/qq:${{ env.TAG }}|" k8s/deployment.yaml
+
+      - name: git push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config credential.helper store
+          git add k8s/deployment.yaml
+          git commit -m ":tada: Update: Image [${{ env.TAG }}]"
+          git push
