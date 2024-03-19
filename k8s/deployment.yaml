@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: qq
+  template:
+    metadata:
+      labels:
+        app: qq
+    spec:
+      containers:
+        - name: qq
+          image: sindonghyun/qq:1.0.5
+          ports:
+            - containerPort: 8080
