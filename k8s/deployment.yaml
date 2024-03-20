@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: qq
-          image: sindonghyun/qq:2.0.3
+          image: sindonghyun/qq:2.0.4
           ports:
             - containerPort: 8080
   strategy:
