@@ -17,3 +17,8 @@ spec:
           image: sindonghyun/qq:2.0.2
           ports:
             - containerPort: 8080
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
