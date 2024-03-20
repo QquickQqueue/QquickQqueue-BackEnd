@@ -22,9 +22,15 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
-  startupProbe:
+  livenessProbe:
     httpGet:
       path: /
       port: 80
-    failureThreshold: 10
-    periodSeconds: 5
+    failureThreshold: 1
+    periodSeconds: 30
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 30
+    periodSeconds: 10
