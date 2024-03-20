@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     @GetMapping("/")
     public ResponseEntity<Message> test() {
-        return new ResponseEntity<>(new Message("무중단배포..", "해치웠나..?"), HttpStatus.OK);
+        return new ResponseEntity<>(new Message("무중단배포..", "진짜.. 해치웠나..?"), HttpStatus.OK);
     }
 }
