@@ -15,6 +15,6 @@ public class TestController {
     @GetMapping("/")
     public ResponseEntity<Message> test() {
         log.info("time ============= {}", LocalTime.now());
-        return new ResponseEntity<>(new Message("ci/cd..", "해치웠나..?"), HttpStatus.OK);
+        return new ResponseEntity<>(new Message("무중단 배포..", "해치웠나..?"), HttpStatus.OK);
     }
 }
