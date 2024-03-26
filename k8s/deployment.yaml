@@ -17,18 +17,6 @@ spec:
           image: sindonghyun/qq:2.0.8
           ports:
             - containerPort: 8080
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            failureThreshold: 1
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 12
           startupProbe:
             httpGet:
               path: /
