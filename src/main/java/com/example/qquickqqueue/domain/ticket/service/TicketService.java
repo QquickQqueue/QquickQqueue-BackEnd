@@ -13,7 +13,12 @@ import com.example.qquickqqueue.util.Message;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,26 +26,55 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final ScheduleSeatRepository scheduleSeatRepository;
+    private final RedissonClient redissonClient;
 
     @Transactional
     public ResponseEntity<Message> createTicket(TicketRequestDto ticketRequestDto, Members members) {
-        ScheduleSeat scheduleSeat = scheduleSeatRepository.findById(ticketRequestDto.getScheduleSeatId()).orElseThrow(
-                () -> new EntityNotFoundException("해당 회차와 좌석을 찾을 수 없습니다. scheduleSeat-id : " + ticketRequestDto.getScheduleSeatId())
-        );
 
-        Schedule schedule = scheduleSeat.getSchedule();
-        Musical musical = schedule.getMusical();
+        RLock rLock = redissonClient.getLock("ticketLock:" + ticketRequestDto.getScheduleSeatId());
 
-        if (scheduleSeat.isReserved()) {
-            throw new EntityExistsException("이미 선택된 좌석입니다.");
-        } else {
-            scheduleSeat.setReserved(true);
-            scheduleSeatRepository.save(scheduleSeat);
+        long waitTime = 5L;
+        long leaseTime = 3L;
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+
+        Schedule schedule = null;
+        Musical musical = null;
+        ScheduleSeat scheduleSeat = null;
+
+        try {
+            boolean available = rLock.tryLock(waitTime, leaseTime, timeUnit);
+            if (!available) {
+                throw new EntityExistsException("이미 선택된 좌석입니다.");
+            }
+
+            scheduleSeat = scheduleSeatRepository.findById(ticketRequestDto.getScheduleSeatId()).orElseThrow(
+                    () -> new EntityNotFoundException("해당 회차와 좌석을 찾을 수 없습니다. scheduleSeat-id : " + ticketRequestDto.getScheduleSeatId())
+            );
+
+            schedule = scheduleSeat.getSchedule();
+            musical = schedule.getMusical();
+
+            if (scheduleSeat.isReserved()) {
+                throw new EntityExistsException("이미 선택된 좌석입니다.");
+            } else {
+                scheduleSeat.setReserved(true);
+                scheduleSeatRepository.saveAndFlush(scheduleSeat);
+            }
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error(e.getMessage());
+        } finally {
+            if (rLock.isHeldByCurrentThread()) {
+                rLock.unlock();
+            }
         }
 
         Ticket newTicket = Ticket.builder()
