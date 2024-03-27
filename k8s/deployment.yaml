@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: qq
-          image: sindonghyun/qq:3.0.1
+          image: sindonghyun/qq:3.1.0
           ports:
             - containerPort: 8080
           startupProbe:
